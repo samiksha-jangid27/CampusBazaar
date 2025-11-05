@@ -1,7 +1,8 @@
 import React, { useContext } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
-import {View, FlatList, Text, StyleSheet } from "react-native";
+import { FlatList, Text, StyleSheet } from "react-native";
 import { AppContext } from "../contexts/AppProvider";
+import ListingCard from "../components/ListingCard";
 
 export default function FavoritesScreen({ navigation }) {
   const { state, dispatch } = useContext(AppContext);
@@ -12,10 +13,7 @@ export default function FavoritesScreen({ navigation }) {
   return (
     <SafeAreaView style={styles.safe}>
       {favListings.length === 0 ? (
-        <View style={styles.favempty}>
-          <Text style={styles.empty}>No favorites yet ❤️</Text>
-        </View>
-
+        <Text style={styles.empty}>No favorites yet ❤️</Text>
       ) : (
         <FlatList
           data={favListings}
@@ -42,5 +40,4 @@ const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: "#FFFFFF" },
   list: { padding: 10, paddingBottom: 20 },
   empty: { textAlign: "center", marginTop: 50, fontSize: 16, color: "#8B0000" },
-  favempty : {flex:1, alignItems:"center", justifyContent: "center"}
 });

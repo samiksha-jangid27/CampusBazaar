@@ -4,9 +4,9 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import HomeScreen from "../screens/HomeScreen";
 import FavoritesScreen from "../screens/FavoritesScreen";
-import ProfileScreen from "../screens/ProfileScreen";
-import CartScreen from "../screens/CartScreen";
-import DetailsScreen from "../screens/DetailsScreen";
+// import ProfileScreen from "../screens/ProfileScreen";
+// import CartScreen from "../screens/CartScreen";
+// import DetailsScreen from "../screens/DetailsScreen";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 const Tab = createBottomTabNavigator();

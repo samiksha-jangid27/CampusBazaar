@@ -1,7 +1,9 @@
-import React , {useState} from "react";
+import React , {useState , useContext} from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StyleSheet, FlatList, View } from "react-native";
 import { Appbar, Card, Button, TextInput, Text } from "react-native-paper";
+import { AppContext } from "../contexts/AppProvider";
+import ListingCard from "../components/ListingCard";
 
 export default function HomeScreen({ navigation }) {
   const [searchQuery, setSearchQuery] = useState("");

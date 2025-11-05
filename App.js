@@ -3,6 +3,7 @@ import { Provider as PaperProvider } from "react-native-paper";
 import HomeScreen from "./src/screens/HomeScreen";
 import FavoritesScreen from "./src/screens/FavoritesScreen";
 import { AppProvider } from "./src/contexts/AppProvider";
+import AppNavigator from "./src/navigation/AppNavigator";
 
 const theme = {
   colors: {
@@ -21,7 +22,7 @@ export default function App() {
   return (
     <PaperProvider theme={theme}>
       <AppProvider>
-        <FavoritesScreen />
+        <AppNavigator />
       </AppProvider>
         
     </PaperProvider>
