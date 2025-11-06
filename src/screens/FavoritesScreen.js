@@ -1,6 +1,6 @@
 import React, { useContext } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { FlatList, Text, StyleSheet } from "react-native";
+import { FlatList, Text, StyleSheet, View } from "react-native";
 import { AppContext } from "../contexts/AppProvider";
 import ListingCard from "../components/ListingCard";
 
@@ -13,7 +13,11 @@ export default function FavoritesScreen({ navigation }) {
   return (
     <SafeAreaView style={styles.safe}>
       {favListings.length === 0 ? (
-        <Text style={styles.empty}>No favorites yet ❤️</Text>
+        <View style={styles.emptyfav}>
+          <Text style={{fontSize: 22,fontWeight: "700", color: "#8B0000",}}>No favorites yet ❤️</Text>
+          <Text style={styles.emptySubText}>Start shopping and add your favorite items!</Text>
+        </View>
+        
       ) : (
         <FlatList
           data={favListings}
@@ -37,7 +41,13 @@ export default function FavoritesScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: "#FFFFFF" },
+  safe: { flex: 1, backgroundColor: "#FFFFFF"},
   list: { padding: 10, paddingBottom: 20 },
-  empty: { textAlign: "center", marginTop: 50, fontSize: 16, color: "#8B0000" },
+  emptyfav: { flex:1, justifyContent:"center" , alignItems: "center" , marginTop: 50, fontSize: 16, color: "#8B0000" },
+  emptySubText: {
+    fontSize: 15,
+    color: "#666",
+    marginTop: 6,
+    textAlign: "center",
+  }
 });

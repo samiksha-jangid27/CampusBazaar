@@ -10,24 +10,25 @@ export default function CartScreen() {
 
   const renderItem = ({ item }) => (
     <Card style={styles.card} mode="elevated">
-      <Card.Cover source={{ uri: item.image }} style={styles.image} />
-      <Card.Title
-        title={item.title}
-        titleNumberOfLines={2}
-        subtitle={`₹${item.price.toFixed(2)}`}
-        subtitleStyle={styles.subtitle}
-      />
-      <Card.Actions>
-        <Button
-          textColor="#8B0000"
-          icon="delete-outline"
-          onPress={() =>
-            dispatch({ type: "removeFromCart", payload: item.id })
-          }
-        >
-          Remove
-        </Button>
-      </Card.Actions>
+      <View style={styles.cardRow}>
+        <Card.Cover source={{ uri: item.image }} style={styles.image} />
+        <View style={styles.cardContent}>
+          <Text style={styles.itemTitle} numberOfLines={2}>
+            {item.title}
+          </Text>
+          <Text style={styles.itemPrice}>₹{item.price.toFixed(2)}</Text>
+          <Button
+            textColor="#8B0000"
+            icon="delete-outline"
+            mode="text"
+            onPress={() =>
+              dispatch({ type: "removeFromCart", payload: item.id })
+            }
+          >
+            Remove
+          </Button>
+        </View>
+      </View>
     </Card>
   );
 
@@ -35,33 +36,41 @@ export default function CartScreen() {
     <SafeAreaView style={styles.safe}>
       {state.cart.length === 0 ? (
         <View style={styles.emptyContainer}>
-          <Text style={styles.emptyIcon}>🛒</Text>
+          <Text style={styles.emptyIcon}>🛍️</Text>
           <Text style={styles.emptyText}>Your cart is empty</Text>
-          <Text style={styles.emptySubText}>Add some products to begin!</Text>
+          <Text style={styles.emptySubText}>
+            Start shopping and add your favorite items!
+          </Text>
         </View>
       ) : (
         <>
-          <Text style={styles.header}>Your Cart</Text>
+          <Text style={styles.header}>🛒 Your Cart</Text>
+
           <FlatList
             data={state.cart}
             keyExtractor={(item) => item.id}
             renderItem={renderItem}
             contentContainerStyle={styles.list}
+            showsVerticalScrollIndicator={false}
           />
 
-          <Divider style={{ marginVertical: 10 }} />
+          <Divider style={styles.divider} />
 
           <View style={styles.footer}>
-            <Text style={styles.totalLabel}>Subtotal</Text>
-            <Text style={styles.totalAmount}>₹{total.toFixed(2)}</Text>
+            <View style={styles.totalRow}>
+              <Text style={styles.totalLabel}>Subtotal</Text>
+              <Text style={styles.totalAmount}>₹{total.toFixed(2)}</Text>
+            </View>
+
             <Button
               mode="contained"
               buttonColor="#8B0000"
               textColor="#FFFFFF"
               style={styles.checkoutBtn}
+              icon="credit-card"
               onPress={() => console.log("Checkout pressed")}
             >
-              Checkout (UI only)
+              Proceed to Checkout
             </Button>
           </View>
         </>
@@ -73,36 +82,75 @@ export default function CartScreen() {
 const styles = StyleSheet.create({
   safe: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#FAFAFA",
   },
   header: {
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: "700",
     color: "#8B0000",
     textAlign: "center",
-    marginVertical: 15,
+    marginVertical: 16,
   },
   list: {
-    paddingHorizontal: 12,
+    paddingHorizontal: 14,
     paddingBottom: 100,
   },
   card: {
-    marginBottom: 12,
-    borderRadius: 10,
+    marginBottom: 14,
+    borderRadius: 14,
     overflow: "hidden",
+    backgroundColor: "#FFF",
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: 3 },
+    shadowRadius: 6,
+    elevation: 3,
+  },
+  cardRow: {
+    flexDirection: "row",
+    alignItems: "center",
   },
   image: {
-    height: 150,
-    resizeMode: "cover",
+    width: 100,
+    height: 100,
+    borderTopLeftRadius: 14,
+    borderBottomLeftRadius: 14,
+  },
+  cardContent: {
+    flex: 1,
+    padding: 10,
+  },
+  itemTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#333",
+    marginBottom: 4,
+  },
+  itemPrice: {
+    fontSize: 15,
+    color: "#8B0000",
+    fontWeight: "500",
+    marginBottom: 6,
   },
   subtitle: {
     color: "#555",
   },
   footer: {
-    padding: 20,
-    borderTopWidth: 0.5,
-    borderColor: "#ccc",
+    backgroundColor: "#FFFFFF",
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    borderTopWidth: 0.6,
+    borderColor: "#E5E5E5",
+    elevation: 12,
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+  },
+  totalRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
     alignItems: "center",
+    marginBottom: 10,
   },
   totalLabel: {
     fontSize: 16,
@@ -110,14 +158,16 @@ const styles = StyleSheet.create({
   },
   totalAmount: {
     fontSize: 22,
-    fontWeight: "bold",
+    fontWeight: "700",
     color: "#8B0000",
-    marginVertical: 8,
   },
   checkoutBtn: {
     borderRadius: 8,
-    marginTop: 8,
-    width: "90%",
+    marginTop: 6,
+    paddingVertical: 4,
+  },
+  divider: {
+    marginVertical: 10,
   },
   emptyContainer: {
     flex: 1,
@@ -126,17 +176,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: 30,
   },
   emptyIcon: {
-    fontSize: 60,
-    marginBottom: 10,
+    fontSize: 70,
+    marginBottom: 15,
   },
   emptyText: {
-    fontSize: 20,
-    fontWeight: "600",
+    fontSize: 22,
+    fontWeight: "700",
     color: "#8B0000",
   },
   emptySubText: {
-    fontSize: 14,
-    color: "#777",
-    marginTop: 5,
+    fontSize: 15,
+    color: "#666",
+    marginTop: 6,
+    textAlign: "center",
   },
 });

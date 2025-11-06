@@ -52,6 +52,15 @@ function Tabs() {
           ),
         }}
       />
+      <Tab.Screen
+        name="Cart"
+        component={CartScreen}
+        options={{
+          tabBarIcon: ({ color, size }) => (
+            <MaterialCommunityIcons name="cart" color={color} size={size} />
+          ),
+        }}
+      />
     </Tab.Navigator>
   );
 }
