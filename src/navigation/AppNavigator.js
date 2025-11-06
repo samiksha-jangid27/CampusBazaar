@@ -47,11 +47,16 @@ function Tabs() {
         name="Favorites"
         component={FavoritesScreen}
         options={{
-          tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="heart" color={color} size={size} />
+          tabBarIcon: ({ color, focused, size }) => (
+            <MaterialCommunityIcons
+              name={focused ? "heart" : "heart-outline"}
+              color={color}
+              size={size}
+            />
           ),
         }}
       />
+
       <Tab.Screen
         name="Cart"
         component={CartScreen}
@@ -61,6 +66,16 @@ function Tabs() {
           ),
         }}
       />
+      <Tab.Screen
+        name="Profile"
+        component={ProfileScreen}
+        options={{
+          tabBarIcon: ({ color, size }) => (
+            <MaterialCommunityIcons name="account" color={color} size={size} />
+          ),
+        }}
+/>
+
     </Tab.Navigator>
   );
 }

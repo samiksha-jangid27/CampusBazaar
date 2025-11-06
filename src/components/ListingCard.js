@@ -5,10 +5,7 @@ import { StyleSheet, View } from "react-native";
 export default function ListingCard({ item, onPress, onFavorite, isFav, onCart }) {
   return (
     <Card style={styles.card} mode="elevated" onPress={onPress}>
-      {/* Product Image */}
       <Card.Cover source={{ uri: item.image }} style={styles.image} />
-
-      {/* Product Details */}
       <Card.Content style={styles.content}>
         <Text style={styles.title} numberOfLines={2}>
           {item.title}
@@ -18,8 +15,6 @@ export default function ListingCard({ item, onPress, onFavorite, isFav, onCart }
         </Text>
         <Text style={styles.price}>₹{item.price.toFixed(2)}</Text>
       </Card.Content>
-
-      {/* Actions */}
       <View style={styles.actions}>
         <IconButton
           icon={isFav ? "heart" : "heart-outline"}
@@ -62,11 +57,11 @@ const styles = StyleSheet.create({
     shadowColor: "#000",
     shadowOpacity: 0.1,
     shadowOffset: { width: 0, height: 3 },
-    shadowRadius: 5,
     overflow: "hidden",
   },
   image: {
-    height: 180,
+    height: 300,
+    borderRadius:0,
     resizeMode: "cover",
   },
   content: {

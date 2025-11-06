@@ -15,14 +15,13 @@ export default function HomeScreen({ navigation }) {
 
   return (
     <SafeAreaView style={styles.safe}>
-      {/* Header */}
+
       <Appbar.Header style={styles.header}>
         <Appbar.Action icon="menu" color="#fff" onPress={() => {}} />
-        <Appbar.Content title="Campus Bazaar" titleStyle={styles.title} />
-        <Appbar.Action icon="magnify" color="#fff" onPress={() => {}} />
+        <Text style={styles.title}>Campus Bazaar</Text>
       </Appbar.Header>
 
-      {/* Search */}
+
       <View style={styles.searchWrapper}>
         <TextInput
           mode="outlined"
@@ -37,7 +36,6 @@ export default function HomeScreen({ navigation }) {
         />
       </View>
 
-      {/* Listings */}
       <FlatList
         data={filteredListings}
         keyExtractor={(item) => item.id}
@@ -74,8 +72,9 @@ const styles = StyleSheet.create({
   },
   header: {
     backgroundColor: "#8B0000",
-    elevation: 4,
-    height: 56,
+    // elevation: 3,
+    // paddingHorizontal:16,
+
   },
   title: {
     color: "#FFFFFF",
