@@ -17,7 +17,6 @@ export default function FavoritesScreen({ navigation }) {
           <Text style={{fontSize: 22,fontWeight: "700", color: "#8B0000",}}>No favorites yet ❤️</Text>
           <Text style={styles.emptySubText}>Start shopping and add your favorite items!</Text>
         </View>
-        
       ) : (
         <FlatList
           data={favListings}

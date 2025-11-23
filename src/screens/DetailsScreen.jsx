@@ -29,12 +29,8 @@ export default function DetailsScreen({ route, navigation }) {
     <SafeAreaView style={styles.safe}>
       <Appbar.Header style={styles.header}>
         <Appbar.BackAction color="#FFF" onPress={() => navigation.goBack()} />
-        <Appbar.Content title="Item Details" color="#FFF" />
-        <Appbar.Action
-          icon={isFav ? "heart" : "heart-outline"}
-          color="#FFF"
-          onPress={() => dispatch({ type: "toggleFavorite", payload: id })}
-        />
+        <Appbar.Content title="Product Details" color="#FFF" />
+       
       </Appbar.Header>
 
       <ScrollView contentContainerStyle={styles.scroll}>

@@ -4,6 +4,7 @@ import HomeScreen from "./src/screens/HomeScreen";
 import FavoritesScreen from "./src/screens/FavoritesScreen";
 import { AppProvider } from "./src/contexts/AppProvider";
 import AppNavigator from "./src/navigation/AppNavigator";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 
 const theme = {
   colors: {
@@ -20,12 +21,14 @@ const theme = {
 
 export default function App() {
   return (
-    <PaperProvider theme={theme}>
-      <AppProvider>
-        <AppNavigator />
-      </AppProvider>
-        
-    </PaperProvider>
+    <SafeAreaProvider>
+      <PaperProvider theme={theme}>
+        <AppProvider>
+          <AppNavigator />
+        </AppProvider>   
+      </PaperProvider>
+    </SafeAreaProvider>
+    
   );
 }
 

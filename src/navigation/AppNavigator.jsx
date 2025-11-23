@@ -86,8 +86,7 @@ function Tabs() {
             />
           ),
         }}
-/>
-
+      />
     </Tab.Navigator>
   );
 }
