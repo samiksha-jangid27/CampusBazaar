@@ -15,10 +15,11 @@ export default function ListingCard({ item, onPress, onFavorite, isFav, onCart }
         </Text>
         <Text style={styles.price}>₹{item.price.toFixed(2)}</Text>
       </Card.Content>
+
       <View style={styles.actions}>
         <IconButton
           icon={isFav ? "heart" : "heart-outline"}
-          iconColor={isFav ? "#8B0000" : "#8B0000"}
+          iconColor="#8B0000"
           size={22}
           onPress={onFavorite}
           style={styles.iconBtn}
@@ -57,11 +58,11 @@ const styles = StyleSheet.create({
     shadowColor: "#000",
     shadowOpacity: 0.1,
     shadowOffset: { width: 0, height: 3 },
-    overflow: "hidden",
+    // ❌ overflow removed
   },
   image: {
     height: 300,
-    borderRadius:0,
+    borderRadius: 0,
     resizeMode: "cover",
   },
   content: {

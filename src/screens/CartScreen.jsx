@@ -17,6 +17,7 @@ export default function CartScreen() {
             {item.title}
           </Text>
           <Text style={styles.itemPrice}>₹{item.price.toFixed(2)}</Text>
+
           <Button
             textColor="#8B0000"
             icon="delete-outline"
@@ -38,9 +39,7 @@ export default function CartScreen() {
         <View style={styles.emptyContainer}>
           <Text style={styles.emptyIcon}>🛍️</Text>
           <Text style={styles.emptyText}>Your cart is empty</Text>
-          <Text style={styles.emptySubText}>
-            Start shopping and add your favorite items!
-          </Text>
+          <Text style={styles.emptySubText}>Start shopping and add items!</Text>
         </View>
       ) : (
         <>
@@ -98,13 +97,13 @@ const styles = StyleSheet.create({
   card: {
     marginBottom: 14,
     borderRadius: 14,
-    overflow: "hidden",
     backgroundColor: "#FFF",
     shadowColor: "#000",
     shadowOpacity: 0.1,
     shadowOffset: { width: 0, height: 3 },
     shadowRadius: 6,
     elevation: 3,
+    // ❌ overflow removed
   },
   cardRow: {
     flexDirection: "row",
@@ -132,24 +131,16 @@ const styles = StyleSheet.create({
     fontWeight: "500",
     marginBottom: 6,
   },
-  subtitle: {
-    color: "#555",
-  },
   footer: {
     backgroundColor: "#FFFFFF",
     paddingVertical: 16,
     paddingHorizontal: 20,
     borderTopWidth: 0.6,
     borderColor: "#E5E5E5",
-    elevation: 12,
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
   },
   totalRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center",
     marginBottom: 10,
   },
   totalLabel: {
@@ -164,16 +155,14 @@ const styles = StyleSheet.create({
   checkoutBtn: {
     borderRadius: 8,
     marginTop: 6,
-    paddingVertical: 4,
   },
   divider: {
     marginVertical: 10,
   },
   emptyContainer: {
     flex: 1,
-    alignItems: "center",
     justifyContent: "center",
-    paddingHorizontal: 30,
+    alignItems: "center",
   },
   emptyIcon: {
     fontSize: 70,
