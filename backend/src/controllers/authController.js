@@ -17,7 +17,7 @@ const generateOTP = () => {
 };
 
 exports.signup = async (req, res) => {
-  const { name, email, password } = req.body;
+  const { name, email, password, phoneNumber } = req.body;
 
   try {
     // Check if user already exists
@@ -39,6 +39,7 @@ exports.signup = async (req, res) => {
       name,
       email,
       password: hashedPassword,
+      phoneNumber,
       otp,
       otpExpires,
     });
