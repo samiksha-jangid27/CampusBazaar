@@ -6,7 +6,6 @@ import { ActivityIndicator, View } from "react-native";
 import HomeScreen from "../screens/HomeScreen";
 import FavoritesScreen from "../screens/FavoritesScreen";
 import ProfileScreen from "../screens/ProfileScreen";
-import CartScreen from "../screens/CartScreen";
 import DetailsScreen from "../screens/DetailsScreen";
 import AddListingScreen from "../screens/AddListingScreen";
 
@@ -66,20 +65,6 @@ function Tabs() {
           tabBarIcon: ({ color, size, focused }) => (
             <MaterialCommunityIcons
               name={focused ? "heart" : "heart-outline"}
-              size={size}
-              color={color}
-            />
-          ),
-        }}
-      />
-
-      <Tab.Screen
-        name="Cart"
-        component={CartScreen}
-        options={{
-          tabBarIcon: ({ color, size, focused }) => (
-            <MaterialCommunityIcons
-              name={focused ? "cart" : "cart-outline"}
               size={size}
               color={color}
             />
