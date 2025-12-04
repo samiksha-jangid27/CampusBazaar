@@ -8,6 +8,8 @@ app.use(express.json());
 
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/listings', require('./routes/listingRoutes'));
+app.use('/api/auth', require('./routes/authRoutes'));
+
 
 app.get('/', (req, res) => res.json({ message: 'CampusBazaar API running (OTP auth)' }));
 

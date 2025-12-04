@@ -8,8 +8,15 @@ import FavoritesScreen from "../screens/FavoritesScreen";
 import ProfileScreen from "../screens/ProfileScreen";
 import CartScreen from "../screens/CartScreen";
 import DetailsScreen from "../screens/DetailsScreen";
-import LoginScreen from "../screens/LoginScreen";
 import AddListingScreen from "../screens/AddListingScreen";
+
+// AUTH SCREENS
+import LoginScreen from "../screens/LoginScreen";
+import SignupScreen from "../screens/SignupScreen";
+import OTPVerificationScreen from "../screens/OTPVerificationScreen";
+import ForgotPasswordScreen from "../screens/ForgotPasswordScreen";
+import ResetPasswordScreen from "../screens/ResetPasswordScreen";
+
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { AuthContext } from "../contexts/AuthContext";
 
@@ -42,24 +49,25 @@ function Tabs() {
         name="Home"
         component={HomeScreen}
         options={{
-          tabBarIcon: ({ color, focused, size }) => (
+          tabBarIcon: ({ color, size, focused }) => (
             <MaterialCommunityIcons
               name={focused ? "home" : "home-outline"}
-              color={color}
               size={size}
+              color={color}
             />
           ),
         }}
       />
+
       <Tab.Screen
         name="Favorites"
         component={FavoritesScreen}
         options={{
-          tabBarIcon: ({ color, focused, size }) => (
+          tabBarIcon: ({ color, size, focused }) => (
             <MaterialCommunityIcons
               name={focused ? "heart" : "heart-outline"}
-              color={color}
               size={size}
+              color={color}
             />
           ),
         }}
@@ -69,24 +77,25 @@ function Tabs() {
         name="Cart"
         component={CartScreen}
         options={{
-          tabBarIcon: ({ color, focused, size }) => (
+          tabBarIcon: ({ color, size, focused }) => (
             <MaterialCommunityIcons
               name={focused ? "cart" : "cart-outline"}
-              color={color}
               size={size}
+              color={color}
             />
           ),
         }}
       />
+
       <Tab.Screen
         name="Profile"
         component={ProfileScreen}
         options={{
-          tabBarIcon: ({ color, focused, size }) => (
+          tabBarIcon: ({ color, size, focused }) => (
             <MaterialCommunityIcons
               name={focused ? "account" : "account-outline"}
-              color={color}
               size={size}
+              color={color}
             />
           ),
         }}
@@ -108,34 +117,23 @@ export default function AppNavigator() {
 
   return (
     <NavigationContainer theme={navTheme}>
-      <Stack.Navigator>
+      <Stack.Navigator screenOptions={{ headerShown: false }}>
+        
+        {/* AUTH FLOW */}
         {!user ? (
-          <Stack.Screen
-            name="Login"
-            component={LoginScreen}
-            options={{ headerShown: false }}
-          />
+          <>
+            <Stack.Screen name="Login" component={LoginScreen} />
+            <Stack.Screen name="Signup" component={SignupScreen} />
+            <Stack.Screen name="OTPVerification" component={OTPVerificationScreen} />
+            <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
+            <Stack.Screen name="ResetPassword" component={ResetPasswordScreen} />
+          </>
         ) : (
           <>
-            <Stack.Screen
-              name="MainTabs"
-              component={Tabs}
-              options={{ headerShown: false }}
-            />
-            <Stack.Screen
-              name="Details"
-              component={DetailsScreen}
-              options={{ headerShown: false }}
-            />
-            <Stack.Screen
-              name="AddListing"
-              component={AddListingScreen}
-              options={{ 
-                headerShown: true,
-                title: "Add Listing",
-                headerTintColor: "#8B0000",
-              }}
-            />
+            {/* MAIN APP */}
+            <Stack.Screen name="MainTabs" component={Tabs} />
+            <Stack.Screen name="Details" component={DetailsScreen} />
+            <Stack.Screen name="AddListing" component={AddListingScreen} />
           </>
         )}
       </Stack.Navigator>
