@@ -1,9 +1,11 @@
 const { prisma } = require('../config/db');
 
 exports.createListing = async (req, res) => {
-  const { title, description, price, category, images } = req.body;
-  if (!title || !description || price == null) {
-    return res.status(400).json({ message: 'title, description and price required' });
+  const { title, description, price, category, subcategory, images } = req.body;
+  const userId = req.user.id;
+
+  if (!title || !description || !price || !category || !subcategory) {
+    return res.status(400).json({ message: "All required fields must be filled." });
   }
 
   try {
@@ -11,18 +13,21 @@ exports.createListing = async (req, res) => {
       data: {
         title,
         description,
-        price: Number(price),
+        price,
         category,
+        subcategory,   // <- FIXED
         images: images || [],
-        sellerId: req.user.userId,
+        sellerId: userId,
       },
     });
-    res.status(201).json(listing);
-  } catch (err) {
-    console.error('createListing error', err);
-    res.status(500).json({ message: 'Server error' });
+
+    res.json(listing);
+  } catch (error) {
+    console.log("createListing error", error);
+    res.status(500).json({ message: "Failed to create listing" });
   }
 };
+
 
 exports.getListings = async (req, res) => {
   const { search, category } = req.query;
