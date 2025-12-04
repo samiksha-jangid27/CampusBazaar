@@ -30,6 +30,22 @@ export default function HomeScreen({ navigation }) {
   const filteredListings = listings.filter((item) =>
     item.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
+    const contactSeller = (item) => {
+    const phone = item.seller?.phoneNumber;
+    if (!phone) return Alert.alert("Error", "Seller has no contact number.");
+
+    const message =
+      item.category === "Services"
+        ? "Hello, I wanted to enquire about this service."
+        : "Hello, is this product still available?";
+
+    const url = `whatsapp://send?phone=${phone}&text=${encodeURIComponent(message)}`;
+
+    Linking.openURL(url).catch(() => {
+      Alert.alert("Error", "Unable to open WhatsApp");
+    });
+  };
+
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -65,14 +81,13 @@ export default function HomeScreen({ navigation }) {
           contentContainerStyle={{ padding: 12, paddingBottom: 120 }}
           renderItem={({ item }) => (
             <ListingCard
-              item={item}
-              onPress={() => navigation.navigate("Details", { id: item._id || item.id })}
-              onFavorite={() =>
-                dispatch({ type: "toggleFavorite", payload: item._id || item.id })
-              }
-              isFav={state.favorites.includes(item._id || item.id)}
-              onCart={() => dispatch({ type: "addToCart", payload: item })}
-            />
+                item={item}
+                onPress={() => navigation.navigate("Details", { id: item.id })}
+                onFavorite={() => dispatch({ type: "toggleFavorite", payload: item.id })}
+                isFav={state.favorites.includes(item.id)}
+                onContact={() => contactSeller(item)}
+              />
+
           )}
           ListEmptyComponent={
             <View style={styles.emptyContainer}>

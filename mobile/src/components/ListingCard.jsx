@@ -26,24 +26,23 @@ export default function ListingCard({ item, onPress, onFavorite, isFav, onCart }
         />
 
         <Button
-          onPress={onCart}
-          textColor="#FFFFFF"
-          buttonColor="#8B0000"
-          mode="contained"
-          style={styles.addBtn}
-        >
-          Add
-        </Button>
+        onPress={onContact}
+        textColor="#fff"
+        buttonColor="#25D366"
+        mode="contained"
+        style={styles.contactBtn}
+      >
+        Contact
+      </Button>
 
-        <Button
-          onPress={onPress}
-          textColor="#8B0000"
-          mode="text"
-          compact
-          style={styles.viewBtn}
-        >
-          View
-        </Button>
+      <Button
+        onPress={onPress}
+        textColor="#8B0000"
+        mode="text"
+        compact
+      >
+        View
+      </Button>
       </View>
     </Card>
   );
@@ -94,12 +93,11 @@ const styles = StyleSheet.create({
   iconBtn: {
     marginHorizontal: 0,
   },
-  addBtn: {
-    borderRadius: 8,
-    flex: 1,
-    marginHorizontal: 4,
-    elevation: 0,
-  },
+  contactBtn: {
+  flex: 1,
+  marginRight: 8,
+  borderRadius: 8
+},
   viewBtn: {
     flex: 1,
     marginHorizontal: 4,
