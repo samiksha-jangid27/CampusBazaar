@@ -2,7 +2,9 @@ import React, { useContext } from "react";
 import { NavigationContainer, DefaultTheme } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { createDrawerNavigator } from "@react-navigation/drawer";
 import { ActivityIndicator, View } from "react-native";
+
 import HomeScreen from "../screens/HomeScreen";
 import FavoritesScreen from "../screens/FavoritesScreen";
 import ProfileScreen from "../screens/ProfileScreen";
@@ -18,9 +20,11 @@ import ResetPasswordScreen from "../screens/ResetPasswordScreen";
 
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { AuthContext } from "../contexts/AuthContext";
+import CustomDrawerContent from "./CustomDrawerContent";
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
+const Drawer = createDrawerNavigator();
 
 const navTheme = {
   ...DefaultTheme,
@@ -34,26 +38,42 @@ const navTheme = {
   },
 };
 
+/* ------------------------------ */
+/*     BOTTOM TABS (WITH ADD)     */
+/* ------------------------------ */
 function Tabs() {
   return (
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: "#8B0000",
-        tabBarInactiveTintColor: "#FF5C5C",
-        tabBarStyle: { backgroundColor: "#FFFFFF" },
+        tabBarInactiveTintColor: "#B94D4D",
+        tabBarStyle: { backgroundColor: "#FFFFFF", height: 62, paddingBottom: 6 },
       }}
     >
       <Tab.Screen
-        name="Home"
+        name="HomeTab"
         component={HomeScreen}
         options={{
+          title: "Home",
           tabBarIcon: ({ color, size, focused }) => (
             <MaterialCommunityIcons
               name={focused ? "home" : "home-outline"}
               size={size}
               color={color}
             />
+          ),
+          headerShown: false,
+        }}
+      />
+
+      <Tab.Screen
+        name="AddListing"
+        component={AddListingScreen}
+        options={{
+          title: "Add",
+          tabBarIcon: ({ color }) => (
+            <MaterialCommunityIcons name="plus-circle" size={34} color={color} />
           ),
         }}
       />
@@ -62,6 +82,7 @@ function Tabs() {
         name="Favorites"
         component={FavoritesScreen}
         options={{
+          title: "Favorites",
           tabBarIcon: ({ color, size, focused }) => (
             <MaterialCommunityIcons
               name={focused ? "heart" : "heart-outline"}
@@ -73,9 +94,10 @@ function Tabs() {
       />
 
       <Tab.Screen
-        name="Profile"
+        name="ProfileTab"
         component={ProfileScreen}
         options={{
+          title: "Profile",
           tabBarIcon: ({ color, size, focused }) => (
             <MaterialCommunityIcons
               name={focused ? "account" : "account-outline"}
@@ -89,8 +111,41 @@ function Tabs() {
   );
 }
 
+/* ------------------------------ */
+/*      DRAWER MENU (wrap tabs)   */
+/* ------------------------------ */
+function DrawerMenu({ logout }) {
+  return (
+    <Drawer.Navigator
+      drawerContent={(props) => <CustomDrawerContent {...props} logout={logout} />}
+      screenOptions={{
+        headerShown: false,
+        drawerActiveTintColor: "#8B0000",
+        drawerInactiveTintColor: "#333",
+        drawerActiveBackgroundColor: "#fff2f2",
+      }}
+    >
+      <Drawer.Screen name="Home" component={Tabs} />
+      <Drawer.Screen
+        name="Products"
+        component={HomeScreen}
+        initialParams={{ category: "Products" }}
+      />
+      <Drawer.Screen
+        name="Services"
+        component={HomeScreen}
+        initialParams={{ category: "Services" }}
+      />
+      <Drawer.Screen name="Profile" component={ProfileScreen} />
+    </Drawer.Navigator>
+  );
+}
+
+/* ------------------------------ */
+/*          MAIN NAVIGATOR        */
+/* ------------------------------ */
 export default function AppNavigator() {
-  const { user, loading } = useContext(AuthContext);
+  const { user, loading, logout } = useContext(AuthContext);
 
   if (loading) {
     return (
@@ -103,7 +158,6 @@ export default function AppNavigator() {
   return (
     <NavigationContainer theme={navTheme}>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
-        
         {/* AUTH FLOW */}
         {!user ? (
           <>
@@ -115,9 +169,14 @@ export default function AppNavigator() {
           </>
         ) : (
           <>
-            {/* MAIN APP */}
-            <Stack.Screen name="MainTabs" component={Tabs} />
+            {/* MAIN APP -> Drawer (wraps Tabs) */}
+            <Stack.Screen name="MainApp">
+              {() => <DrawerMenu logout={logout} />}
+            </Stack.Screen>
+
+            {/* Deep screens */}
             <Stack.Screen name="Details" component={DetailsScreen} />
+            {/* Keep AddListing in stack too so navigation.push works */}
             <Stack.Screen name="AddListing" component={AddListingScreen} />
           </>
         )}

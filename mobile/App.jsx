@@ -1,11 +1,11 @@
 import React from "react";
 import { Provider as PaperProvider } from "react-native-paper";
-import HomeScreen from "./src/screens/HomeScreen";
-import FavoritesScreen from "./src/screens/FavoritesScreen";
+import { SafeAreaProvider } from "react-native-safe-area-context";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+
 import { AppProvider } from "./src/contexts/AppProvider";
 import { AuthProvider } from "./src/contexts/AuthContext";
 import AppNavigator from "./src/navigation/AppNavigator";
-import { SafeAreaProvider } from "react-native-safe-area-context";
 
 const theme = {
   colors: {
@@ -22,16 +22,16 @@ const theme = {
 
 export default function App() {
   return (
-    <SafeAreaProvider>
-      <PaperProvider theme={theme}>
-        <AuthProvider>
-          <AppProvider>
-            <AppNavigator />
-          </AppProvider>
-        </AuthProvider>
-      </PaperProvider>
-    </SafeAreaProvider>
-    
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaProvider>
+        <PaperProvider theme={theme}>
+          <AuthProvider>
+            <AppProvider>
+              <AppNavigator />
+            </AppProvider>
+          </AuthProvider>
+        </PaperProvider>
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
   );
 }
-
