@@ -1,11 +1,16 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
-const auth = require("../middleware/authMiddleware");
-const { createListing, getListings, getListingById, deleteListing } = require("../controllers/listingController");
+const auth = require('../middleware/auth');
+const {
+  createListing,
+  getListings,
+  getListingById,
+  deleteListing,
+} = require('../controllers/listingController');
 
-router.post("/", auth, createListing);
-router.get("/", getListings);
-router.get("/:id", getListingById);
-router.delete("/:id", auth, deleteListing);
+router.post('/', auth, createListing);
+router.get('/', getListings);
+router.get('/:id', getListingById);
+router.delete('/:id', auth, deleteListing);
 
 module.exports = router;

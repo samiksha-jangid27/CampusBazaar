@@ -1,70 +1,52 @@
 import React, { useState, useContext } from "react";
-import { View, StyleSheet, Image, KeyboardAvoidingView, Platform, Alert } from "react-native";
+import { View, StyleSheet, KeyboardAvoidingView, Platform, Alert } from "react-native";
 import { Text, TextInput, Button, useTheme } from "react-native-paper";
 import { AuthContext } from "../contexts/AuthContext";
 
-const LoginScreen = ({ navigation }) => {
+const LoginScreen = () => {
   const { colors } = useTheme();
-  const { login, signup, verifyOTP } = useContext(AuthContext);
+  const { login, signup } = useContext(AuthContext);
 
-  const [isLogin, setIsLogin] = useState(true);
+  const [isSignup, setIsSignup] = useState(false);
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [otp, setOtp] = useState("");
-  const [isVerifying, setIsVerifying] = useState(false);
+  const [isOTPMode, setIsOTPMode] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const handleLogin = async () => {
-    if (!email || !password) {
-      Alert.alert("Error", "Please fill in all fields");
-      return;
-    }
-    setLoading(true);
-    const result = await login(email, password);
-    setLoading(false);
-    if (!result.success) {
-      Alert.alert("Login Failed", result.message);
-    }
-  };
-
+  // --- SIGNUP STEP 1: Send OTP ---
   const handleSignup = async () => {
-    if (!email || !password || !name) {
-      Alert.alert("Error", "Please fill in all fields");
+    if (!email || !name) {
+      Alert.alert("Error", "Please enter name and email");
       return;
     }
-    // Basic validation for university email (simple check)
-    // if (!email.endsWith(".edu")) { // Uncomment if strict check needed
-    //   Alert.alert("Error", "Please use a university email");
-    //   return;
-    // }
 
     setLoading(true);
-    const result = await signup(name, email, password, phoneNumber);
+    const res = await signup(name, email, phoneNumber);
     setLoading(false);
-    if (result.success) {
-      setIsVerifying(true);
-      Alert.alert("Success", "OTP sent to your email");
+
+    if (res.success) {
+      Alert.alert("OTP Sent", "Check your email for the OTP");
+      setIsOTPMode(true);
     } else {
-      Alert.alert("Signup Failed", result.message);
+      Alert.alert("Signup Failed", res.message);
     }
   };
 
-  const handleVerify = async () => {
-    if (!otp) {
-      Alert.alert("Error", "Please enter OTP");
+  // --- LOGIN STEP: Verify OTP ---
+  const handleLogin = async () => {
+    if (!email || !otp) {
+      Alert.alert("Error", "Please enter email and OTP");
       return;
     }
+
     setLoading(true);
-    const result = await verifyOTP(email, otp);
+    const res = await login(email, otp);
     setLoading(false);
-    if (result.success) {
-      Alert.alert("Success", "Email verified! Please login.");
-      setIsVerifying(false);
-      setIsLogin(true);
-    } else {
-      Alert.alert("Verification Failed", result.message);
+
+    if (!res.success) {
+      Alert.alert("Login Failed", res.message);
     }
   };
 
@@ -74,151 +56,100 @@ const LoginScreen = ({ navigation }) => {
       style={styles.container}
     >
       <View style={styles.logoContainer}>
-        {/* Placeholder for Logo */}
-        <View style={[styles.logoPlaceholder, { backgroundColor: colors.primary }]}>
+        <View style={[styles.logoCircle, { backgroundColor: colors.primary }]}>
           <Text style={styles.logoText}>CB</Text>
         </View>
         <Text style={[styles.title, { color: colors.primary }]}>CampusBazaar</Text>
       </View>
 
-      <View style={styles.formContainer}>
-        {isVerifying ? (
-          <>
-            <Text style={styles.header}>Verify Email</Text>
+      {/* ------------------ OTP ENTRY ------------------ */}
+      {isOTPMode ? (
+        <View style={styles.formContainer}>
+          <Text style={styles.header}>Enter OTP</Text>
+
+          <TextInput
+            label="OTP"
+            value={otp}
+            onChangeText={setOtp}
+            keyboardType="number-pad"
+            mode="outlined"
+            style={styles.input}
+          />
+
+          <Button mode="contained" onPress={handleLogin} loading={loading} style={styles.button}>
+            Verify OTP
+          </Button>
+
+          <Button onPress={() => setIsOTPMode(false)} style={styles.link}>
+            Back
+          </Button>
+        </View>
+      ) : (
+        <View style={styles.formContainer}>
+          <Text style={styles.header}>{isSignup ? "Create Account" : "Login"}</Text>
+
+          {isSignup && (
             <TextInput
-              label="Enter OTP"
-              value={otp}
-              onChangeText={setOtp}
+              label="Full Name"
+              value={name}
+              onChangeText={setName}
               mode="outlined"
               style={styles.input}
-              keyboardType="number-pad"
             />
-            <Button
-              mode="contained"
-              onPress={handleVerify}
-              loading={loading}
-              style={styles.button}
-            >
-              Verify OTP
-            </Button>
-            <Button onPress={() => setIsVerifying(false)} style={styles.link}>
-              Back
-            </Button>
-          </>
-        ) : (
-          <>
-            <Text style={styles.header}>{isLogin ? "Login" : "Sign Up"}</Text>
-            
-            {!isLogin && (
-              <TextInput
-                label="Full Name"
-                value={name}
-                onChangeText={setName}
-                mode="outlined"
-                style={styles.input}
-              />
-            )}
+          )}
 
+          <TextInput
+            label="University Email"
+            value={email}
+            onChangeText={setEmail}
+            keyboardType="email-address"
+            mode="outlined"
+            style={styles.input}
+          />
+
+          {isSignup && (
             <TextInput
-              label="University Email"
-              value={email}
-              onChangeText={setEmail}
+              label="Phone Number"
+              value={phoneNumber}
+              onChangeText={setPhoneNumber}
+              keyboardType="phone-pad"
               mode="outlined"
               style={styles.input}
-              autoCapitalize="none"
-              keyboardType="email-address"
             />
+          )}
 
-            <TextInput
-              label="Password"
-              value={password}
-              onChangeText={setPassword}
-              mode="outlined"
-              secureTextEntry
-              style={styles.input}
-            />
+          <Button
+            mode="contained"
+            loading={loading}
+            onPress={isSignup ? handleSignup : () => setIsOTPMode(true)}
+            style={styles.button}
+          >
+            {isSignup ? "Send OTP" : "Login with OTP"}
+          </Button>
 
-            {!isLogin && (
-              <TextInput
-                label="Phone Number (for WhatsApp)"
-                value={phoneNumber}
-                onChangeText={setPhoneNumber}
-                mode="outlined"
-                keyboardType="phone-pad"
-                style={styles.input}
-              />
-            )}
-
-            <Button
-              mode="contained"
-              onPress={isLogin ? handleLogin : handleSignup}
-              loading={loading}
-              style={styles.button}
-            >
-              {isLogin ? "Login" : "Sign Up"}
-            </Button>
-
-            <Button
-              onPress={() => setIsLogin(!isLogin)}
-              style={styles.link}
-            >
-              {isLogin
-                ? "Don't have an account? Sign Up"
-                : "Already have an account? Login"}
-            </Button>
-          </>
-        )}
-      </View>
+          <Button onPress={() => setIsSignup(!isSignup)} style={styles.link}>
+            {isSignup ? "Already have an account? Login" : "New here? Sign Up"}
+          </Button>
+        </View>
+      )}
     </KeyboardAvoidingView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-    justifyContent: "center",
-    padding: 20,
+  container: { flex: 1, backgroundColor: "#fff", justifyContent: "center", padding: 20 },
+  logoContainer: { alignItems: "center", marginBottom: 40 },
+  logoCircle: {
+    width: 80, height: 80, borderRadius: 40,
+    justifyContent: "center", alignItems: "center", marginBottom: 10,
   },
-  logoContainer: {
-    alignItems: "center",
-    marginBottom: 40,
-  },
-  logoPlaceholder: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 10,
-  },
-  logoText: {
-    color: "#fff",
-    fontSize: 30,
-    fontWeight: "bold",
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: "bold",
-  },
-  formContainer: {
-    width: "100%",
-  },
-  header: {
-    fontSize: 24,
-    marginBottom: 20,
-    textAlign: "center",
-  },
-  input: {
-    marginBottom: 15,
-  },
-  button: {
-    marginTop: 10,
-    paddingVertical: 5,
-  },
-  link: {
-    marginTop: 15,
-  },
+  logoText: { color: "#fff", fontSize: 28, fontWeight: "bold" },
+  title: { fontSize: 28, fontWeight: "bold" },
+  formContainer: { width: "100%" },
+  header: { fontSize: 24, marginBottom: 20, textAlign: "center" },
+  input: { marginBottom: 15 },
+  button: { marginTop: 10, paddingVertical: 5, backgroundColor: "#8B0000" },
+  link: { marginTop: 15, alignSelf: "center", color: "#8B0000" },
 });
 
 export default LoginScreen;
