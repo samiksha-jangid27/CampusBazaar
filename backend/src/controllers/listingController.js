@@ -1,67 +1,81 @@
-const Listing = require("../models/Listing");
+const { prisma } = require("../config/db");
 
-// @route   POST api/listings
-// @desc    Create a listing
-// @access  Private
+// ------------------------------
+// CREATE LISTING  (POST /api/listings)
+// ------------------------------
 exports.createListing = async (req, res) => {
   const { title, description, price, category, subcategory, images } = req.body;
 
   try {
-    const newListing = new Listing({
-      title,
-      description,
-      price,
-      category,
-      subcategory,
-      images,
-      seller: req.user.id,
+    const listing = await prisma.listing.create({
+      data: {
+        title,
+        description,
+        price: Number(price),
+        category,
+        subcategory,
+        images,
+        sellerId: req.user.userId, // from auth middleware
+      },
     });
 
-    const listing = await newListing.save();
     res.json(listing);
   } catch (err) {
-    console.error(err.message);
-    res.status(500).send("Server Error");
+    console.error(err);
+    res.status(500).json({ message: "Server Error" });
   }
 };
 
-// @route   GET api/listings
-// @desc    Get all listings (with search & filter)
-// @access  Public
+// ------------------------------
+// GET ALL LISTINGS  (GET /api/listings)
+// with search + category filters
+// ------------------------------
 exports.getListings = async (req, res) => {
   const { search, category, subcategory } = req.query;
-  let query = {};
+
+  let where = {};
 
   if (search) {
-    query.$or = [
-      { title: { $regex: search, $options: "i" } },
-      { description: { $regex: search, $options: "i" } },
+    where.OR = [
+      { title: { contains: search, mode: "insensitive" } },
+      { description: { contains: search, mode: "insensitive" } },
     ];
   }
 
-  if (category) {
-    query.category = category;
-  }
-
-  if (subcategory) {
-    query.subcategory = subcategory;
-  }
+  if (category) where.category = category;
+  if (subcategory) where.subcategory = subcategory;
 
   try {
-    const listings = await Listing.find(query).populate("seller", "name email profilePicture").sort({ createdAt: -1 });
+    const listings = await prisma.listing.findMany({
+      where,
+      include: {
+        seller: {
+          select: { id: true, name: true, email: true, profilePicture: true },
+        },
+      },
+      orderBy: { createdAt: "desc" },
+    });
+
     res.json(listings);
   } catch (err) {
-    console.error(err.message);
-    res.status(500).send("Server Error");
+    console.error(err);
+    res.status(500).json({ message: "Server Error" });
   }
 };
 
-// @route   GET api/listings/:id
-// @desc    Get listing by ID
-// @access  Public
+// ------------------------------
+// GET LISTING BY ID (GET /api/listings/:id)
+// ------------------------------
 exports.getListingById = async (req, res) => {
   try {
-    const listing = await Listing.findById(req.params.id).populate("seller", "name email profilePicture");
+    const listing = await prisma.listing.findUnique({
+      where: { id: Number(req.params.id) },
+      include: {
+        seller: {
+          select: { id: true, name: true, email: true, profilePicture: true },
+        },
+      },
+    });
 
     if (!listing) {
       return res.status(404).json({ message: "Listing not found" });
@@ -69,38 +83,37 @@ exports.getListingById = async (req, res) => {
 
     res.json(listing);
   } catch (err) {
-    console.error(err.message);
-    if (err.kind === "ObjectId") {
-      return res.status(404).json({ message: "Listing not found" });
-    }
-    res.status(500).send("Server Error");
+    console.error(err);
+    res.status(500).json({ message: "Server Error" });
   }
 };
 
-// @route   DELETE api/listings/:id
-// @desc    Delete a listing
-// @access  Private
+// ------------------------------
+// DELETE LISTING (DELETE /api/listings/:id)
+// ------------------------------
 exports.deleteListing = async (req, res) => {
   try {
-    const listing = await Listing.findById(req.params.id);
+    const id = Number(req.params.id);
+
+    const listing = await prisma.listing.findUnique({
+      where: { id },
+    });
 
     if (!listing) {
       return res.status(404).json({ message: "Listing not found" });
     }
 
-    // Check user
-    if (listing.seller.toString() !== req.user.id) {
+    if (listing.sellerId !== req.user.userId) {
       return res.status(401).json({ message: "User not authorized" });
     }
 
-    await listing.deleteOne();
+    await prisma.listing.delete({
+      where: { id },
+    });
 
     res.json({ message: "Listing removed" });
   } catch (err) {
-    console.error(err.message);
-    if (err.kind === "ObjectId") {
-      return res.status(404).json({ message: "Listing not found" });
-    }
-    res.status(500).send("Server Error");
+    console.error(err);
+    res.status(500).json({ message: "Server Error" });
   }
 };

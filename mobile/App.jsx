@@ -3,6 +3,7 @@ import { Provider as PaperProvider } from "react-native-paper";
 import HomeScreen from "./src/screens/HomeScreen";
 import FavoritesScreen from "./src/screens/FavoritesScreen";
 import { AppProvider } from "./src/contexts/AppProvider";
+import { AuthProvider } from "./src/contexts/AuthContext";
 import AppNavigator from "./src/navigation/AppNavigator";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
@@ -23,9 +24,11 @@ export default function App() {
   return (
     <SafeAreaProvider>
       <PaperProvider theme={theme}>
-        <AppProvider>
-          <AppNavigator />
-        </AppProvider>   
+        <AuthProvider>
+          <AppProvider>
+            <AppNavigator />
+          </AppProvider>
+        </AuthProvider>
       </PaperProvider>
     </SafeAreaProvider>
     

@@ -1,13 +1,17 @@
-import React from "react";
+import React, { useContext } from "react";
 import { NavigationContainer, DefaultTheme } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { ActivityIndicator, View } from "react-native";
 import HomeScreen from "../screens/HomeScreen";
 import FavoritesScreen from "../screens/FavoritesScreen";
 import ProfileScreen from "../screens/ProfileScreen";
 import CartScreen from "../screens/CartScreen";
 import DetailsScreen from "../screens/DetailsScreen";
+import LoginScreen from "../screens/LoginScreen";
+import AddListingScreen from "../screens/AddListingScreen";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { AuthContext } from "../contexts/AuthContext";
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -92,19 +96,48 @@ function Tabs() {
 }
 
 export default function AppNavigator() {
+  const { user, loading } = useContext(AuthContext);
+
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" color="#8B0000" />
+      </View>
+    );
+  }
+
   return (
     <NavigationContainer theme={navTheme}>
       <Stack.Navigator>
-        <Stack.Screen
-          name="MainTabs"
-          component={Tabs}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="Details"
-          component={DetailsScreen}
-          options={{ headerShown: false }}
-        />
+        {!user ? (
+          <Stack.Screen
+            name="Login"
+            component={LoginScreen}
+            options={{ headerShown: false }}
+          />
+        ) : (
+          <>
+            <Stack.Screen
+              name="MainTabs"
+              component={Tabs}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="Details"
+              component={DetailsScreen}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="AddListing"
+              component={AddListingScreen}
+              options={{ 
+                headerShown: true,
+                title: "Add Listing",
+                headerTintColor: "#8B0000",
+              }}
+            />
+          </>
+        )}
       </Stack.Navigator>
     </NavigationContainer>
   );

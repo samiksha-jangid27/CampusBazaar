@@ -5,15 +5,15 @@ import { StyleSheet, View } from "react-native";
 export default function ListingCard({ item, onPress, onFavorite, isFav, onCart }) {
   return (
     <Card style={styles.card} mode="elevated" onPress={onPress}>
-      <Card.Cover source={{ uri: item.image }} style={styles.image} />
+      <Card.Cover source={{ uri: item.images?.[0] || item.image || "https://via.placeholder.com/300" }} style={styles.image} />
       <Card.Content style={styles.content}>
         <Text style={styles.title} numberOfLines={2}>
           {item.title}
         </Text>
         <Text style={styles.description} numberOfLines={2}>
-          {item.desc || "No description available."}
+          {item.description || item.desc || "No description available."}
         </Text>
-        <Text style={styles.price}>₹{item.price.toFixed(2)}</Text>
+        <Text style={styles.price}>₹{item.price?.toFixed(2)}</Text>
       </Card.Content>
 
       <View style={styles.actions}>

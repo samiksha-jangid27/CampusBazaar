@@ -42,9 +42,9 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const signup = async (name, email, password) => {
+  const signup = async (name, email, password, phoneNumber) => {
     try {
-      await api.post("/auth/signup", { name, email, password });
+      await api.post("/auth/signup", { name, email, password, phoneNumber });
       return { success: true };
     } catch (error) {
       console.error(error);
