@@ -11,7 +11,7 @@ model User {
   id             Int       @id @default(autoincrement())
   name           String
   email          String    @unique
-  password       String    // used for login
+  password       String
   phoneNumber    String?
   isVerified     Boolean   @default(false)
   otp            String?
@@ -23,16 +23,17 @@ model User {
   updatedAt      DateTime  @updatedAt
 }
 
-
 model Listing {
-  id         Int      @id @default(autoincrement())
-  title      String
+  id          Int      @id @default(autoincrement())
+  title       String
   description String
-  price      Float
-  category   String?
-  images     String[]
-  sellerId   Int
-  seller     User     @relation(fields: [sellerId], references: [id])
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  price       Float
+  category    String
+  subcategory String
+  images      String[]
+  sellerId    Int
+  seller      User     @relation(fields: [sellerId], references: [id])
+  savedBy     User[]   @relation("SavedListings")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
