@@ -1,5 +1,6 @@
-import React, { useContext, useMemo, useState } from "react";
-import { SafeAreaView } from "react-native-safe-area-context";
+// src/screens/ProfileScreen.js
+
+import React, { useContext, useState } from "react";
 import {
   View,
   StyleSheet,
@@ -7,248 +8,239 @@ import {
   Image,
   Alert,
 } from "react-native";
-import { Avatar, Button, Card, Text, TextInput } from "react-native-paper";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Text, TextInput, Button } from "react-native-paper";
 import * as ImagePicker from "expo-image-picker";
-import { AppContext } from "../contexts/AppProvider";
+
 import { AuthContext } from "../contexts/AuthContext";
+import { AppContext } from "../contexts/AppProvider";
 
-
-export default function ProfileScreen({navigation}) {
-  const { state, setUser } = useContext(AppContext);
+export default function ProfileScreen({ navigation }) {
+  const { user, updateProfile, logout } = useContext(AuthContext);
+  const { state } = useContext(AppContext);
 
   const [editing, setEditing] = useState(false);
-  const [profileImage, setProfileImage] = useState(
-    state.user?.profilePicture || null
-  );
-  const [name, setName] = useState(state.user?.name || "");
-  const [phone, setPhone] = useState(state.user?.phoneNumber || "");
+  const [name, setName] = useState(user?.name || "");
+  const [phone, setPhone] = useState(user?.phoneNumber || "");
+  const [image, setImage] = useState(user?.profilePicture || null);
 
-  // INITIALS DISPLAY LOGIC
-  const initials = useMemo(() => {
-    if (profileImage && profileImage !== "") return ""; // hide initials when image exists
-
-    const userName = state.user?.name || "User";
-    return userName
-      .split(" ")
-      .map((n) => n[0])
-      .slice(0, 2)
-      .join("")
-      .toUpperCase();
-  }, [state.user, profileImage]);
-
-  // PICK IMAGE
+  // Pick image
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       allowsEditing: true,
       quality: 0.8,
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
     });
-
     if (!result.canceled) {
-      setProfileImage(result.assets[0].uri);
+      setImage(result.assets[0].uri);
     }
   };
 
-  // SAVE ONLY LOCALLY (no backend)
-  const handleSave = () => {
-    const updated = {
-      ...state.user,
-      name,
-      phoneNumber: phone,
-      profilePicture: profileImage,
-    };
+  const handleSave = async () => {
+    if (!name.trim()) return Alert.alert("Enter your name");
 
-    setUser(updated); // update context only
-    Alert.alert("Saved", "Profile updated locally.");
-    setEditing(false);
+    const payload = { name, phoneNumber: phone, profilePicture: image };
+
+    const success = await updateProfile(payload);
+    if (success) {
+      Alert.alert("Updated", "Profile updated successfully");
+      setEditing(false);
+    } else {
+      Alert.alert("Error", "Failed to update profile");
+    }
   };
-  const { logout } = useContext(AuthContext);
+
+  const initials = name
+    ? name.split(" ").map((n) => n[0]).join("").toUpperCase()
+    : "U";
 
   return (
     <SafeAreaView style={styles.safe}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={pickImage}>
-          {profileImage ? (
-            <Image
-              source={{ uri: profileImage }}
-              style={styles.profilePhoto}
-              onError={() => setProfileImage(null)}
-            />
+      {/* HEADER */}
+      <Text style={styles.headerTitle}>My Profile</Text>
+
+      {/* PROFILE SECTION */}
+      <View style={styles.profileSection}>
+        <TouchableOpacity onPress={editing ? pickImage : null}>
+          {image ? (
+            <Image source={{ uri: image }} style={styles.avatar} />
           ) : (
-            <Avatar.Text
-              label={initials}
-              size={90}
-              color="#FFFFFF"
-              style={styles.avatar}
-            />
+            <View style={styles.avatarPlaceholder}>
+              <Text style={styles.avatarInitials}>{initials}</Text>
+            </View>
           )}
         </TouchableOpacity>
 
         {editing ? (
           <>
             <TextInput
-              label="Name"
               mode="outlined"
-              style={styles.editInput}
+              label="Full Name"
               value={name}
               onChangeText={setName}
+              style={styles.input}
             />
-
             <TextInput
-              label="Phone Number"
               mode="outlined"
-              style={styles.editInput}
+              label="Phone Number"
+              keyboardType="phone-pad"
               value={phone}
               onChangeText={setPhone}
-              keyboardType="numeric"
+              style={styles.input}
             />
           </>
         ) : (
           <>
-            <Text style={styles.name}>{state.user?.name}</Text>
-            <Text style={styles.email}>{state.user?.email}</Text>
-            {state.user?.phoneNumber ? (
-              <Text style={styles.phone}>{state.user.phoneNumber}</Text>
+            <Text style={styles.name}>{user?.name}</Text>
+            <Text style={styles.email}>{user?.email}</Text>
+            {user?.phoneNumber ? (
+              <Text style={styles.phone}>+91 {user?.phoneNumber}</Text>
             ) : null}
           </>
         )}
       </View>
 
-      <View style={styles.content}>
-        <Card style={styles.card} mode="elevated">
-          <Card.Content>
-            <Text style={styles.sectionTitle}>Account</Text>
+      {/* MENU */}
+      <View style={styles.menuSection}>
+        <TouchableOpacity
+          style={styles.menuRow}
+          onPress={() => navigation.navigate("MyListings")}
+        >
+          <Text style={styles.menuText}>My Listings</Text>
+          <Text style={styles.arrow}>›</Text>
+        </TouchableOpacity>
 
-            <View style={styles.row}>
-              <Text style={styles.rowLabel}>Listings</Text>
-              <Text style={styles.rowValue}>0</Text>
-            </View>
-
-            <View style={styles.row}>
-              <Text style={styles.rowLabel}>Favorites</Text>
-              <Text style={styles.rowValue}>—</Text>
-            </View>
-          </Card.Content>
-        </Card>
-
-        {editing ? (
-          <Button
-            mode="contained"
-            buttonColor="#8B0000"
-            textColor="#FFFFFF"
-            style={styles.btn}
-            onPress={handleSave}
-          >
-            Save Changes
-          </Button>
-        ) : (
-          <Button
-            mode="contained"
-            buttonColor="#8B0000"
-            textColor="#FFFFFF"
-            style={styles.btn}
-            onPress={() => setEditing(true)}
-          >
-            Edit Profile
-          </Button>
-        )}
-
-        {!editing && (
-          <Button
-            mode="outlined"
-            textColor="#8B0000"
-            style={styles.btnOutline}
-            onPress={() => {
-              logout();                 // clears user in AuthContext
-              navigation.replace("Login"); // immediately jumps to login
-            }}
-          >
-            Log out
-          </Button>
-        )}
+        <TouchableOpacity
+          style={styles.menuRow}
+          onPress={() => navigation.navigate("Favorites")}
+        >
+          <Text style={styles.menuText}>My Wishlist</Text>
+          <Text style={styles.arrow}>›</Text>
+        </TouchableOpacity>
       </View>
+
+      {/* BUTTONS */}
+      {editing ? (
+        <Button mode="contained" textColor="#fff" buttonColor="#8B0000" style={styles.btn} onPress={handleSave}>
+          Save Changes
+        </Button>
+      ) : (
+        <Button mode="contained" textColor="#fff" buttonColor="#8B0000" style={styles.btn} onPress={() => setEditing(true)}>
+          Edit Profile
+        </Button>
+      )}
+
+      <Button
+        mode="outlined"
+        textColor="#8B0000"
+        style={styles.logoutBtn}
+        onPress={logout}
+      >
+        Log Out
+      </Button>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: "#FFFFFF" },
+  safe: {
+    flex: 1,
+    backgroundColor: "#fff",
+    paddingHorizontal: 20,
+  },
 
-  header: {
+  headerTitle: {
+    fontSize: 26,
+    fontWeight: "700",
+    marginTop: 10,
+    marginBottom: 20,
+    color: "#8B0000",
+    textAlign: "center",
+  },
+
+  profileSection: {
     alignItems: "center",
-    paddingTop: 28,
-    paddingBottom: 16,
+    marginBottom: 25,
   },
 
   avatar: {
-    backgroundColor: "#8B0000",
+    width: 110,
+    height: 110,
+    borderRadius: 55,
+    marginBottom: 10,
   },
 
-  profilePhoto: {
-    width: 95,
-    height: 95,
-    borderRadius: 48,
-    backgroundColor: "#eee",
+  avatarPlaceholder: {
+    width: 110,
+    height: 110,
+    borderRadius: 55,
+    backgroundColor: "#ddd",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+
+  avatarInitials: {
+    fontSize: 36,
+    fontWeight: "700",
+    color: "#8B0000",
   },
 
   name: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: "700",
     color: "#222",
-    marginTop: 10,
   },
 
   email: {
-    fontSize: 14,
+    fontSize: 15,
     color: "#666",
     marginTop: 4,
   },
 
   phone: {
-    fontSize: 14,
+    fontSize: 15,
     color: "#444",
-    marginTop: 4,
+    marginTop: 2,
   },
 
-  editInput: {
-    width: "80%",
-    marginTop: 10,
+  input: {
+    width: "90%",
+    marginVertical: 8,
   },
 
-  content: {
-    paddingHorizontal: 16,
-    paddingTop: 20,
-  },
-
-  card: {
+  menuSection: {
+    backgroundColor: "#fafafa",
     borderRadius: 12,
-    marginBottom: 16,
-    elevation: 3,
-    backgroundColor: "#FFFFFF",
+    paddingVertical: 10,
+    marginBottom: 20,
+    elevation: 2,
   },
 
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: "#8B0000",
-    marginBottom: 10,
-  },
-
-  row: {
+  menuRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 8,
+    paddingVertical: 15,
+    paddingHorizontal: 15,
   },
 
-  rowLabel: { fontSize: 15, color: "#333" },
-  rowValue: { fontSize: 15, color: "#8B0000", fontWeight: "600" },
+  menuText: {
+    fontSize: 17,
+    color: "#333",
+    fontWeight: "500",
+  },
+
+  arrow: {
+    fontSize: 22,
+    color: "#999",
+  },
 
   btn: {
     borderRadius: 10,
     marginBottom: 10,
   },
 
-  btnOutline: {
+  logoutBtn: {
     borderRadius: 10,
     borderColor: "#8B0000",
   },
