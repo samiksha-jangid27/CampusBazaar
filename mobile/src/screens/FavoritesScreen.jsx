@@ -2,23 +2,35 @@
 
 import React, { useContext } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { FlatList, Text, StyleSheet, View } from "react-native";
+import {
+  FlatList,
+  Text,
+  StyleSheet,
+  View,
+  TouchableOpacity,
+} from "react-native";
 import { AppContext } from "../contexts/AppProvider";
 import ListingCard from "../components/ListingCard";
+import { IconButton } from "react-native-paper";
 
 export default function FavoritesScreen({ navigation }) {
   const { state, dispatch } = useContext(AppContext);
 
-  // ❤️ favorites ARE FULL ITEMS, not IDs
   const favListings = state.favorites;
 
   return (
     <SafeAreaView style={styles.safe}>
+      {/* 🔥 Header */}
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>My Wishlist ❤️</Text>
+      </View>
+
+      {/* If No Favorites */}
       {favListings.length === 0 ? (
-        <View style={styles.emptyfav}>
+        <View style={styles.emptyContainer}>
           <Text style={styles.emptyTitle}>No favorites yet ❤️</Text>
-          <Text style={styles.emptySubText}>
-            Start browsing and save your favorite items!
+          <Text style={styles.emptySubtitle}>
+            Start exploring and save items you like!
           </Text>
         </View>
       ) : (
@@ -27,19 +39,19 @@ export default function FavoritesScreen({ navigation }) {
           keyExtractor={(item) => String(item.id)}
           contentContainerStyle={styles.list}
           renderItem={({ item }) => (
-            <ListingCard
-              item={item}
-              onPress={() =>
-                navigation.navigate("Details", { id: item.id })
-              }
-              isFav={true}
-              onFavorite={() =>
-                dispatch({
-                  type: "REMOVE_FAVORITE",
-                  payload: item.id,
-                })
-              }
-            />
+            <View style={styles.cardWrapper}>
+              <ListingCard
+                item={item}
+                isFav={true}
+                onPress={() => navigation.navigate("Details", { id: item.id })}
+                onFavorite={() =>
+                  dispatch({
+                    type: "REMOVE_FAVORITE",
+                    payload: item.id,
+                  })
+                }
+              />
+            </View>
           )}
         />
       )}
@@ -48,11 +60,36 @@ export default function FavoritesScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: "#FFFFFF" },
+  safe: {
+    flex: 1,
+    backgroundColor: "#FFFFFF",
+  },
 
-  list: { padding: 10, paddingBottom: 20 },
+  /* 🔥 HEADER */
+  header: {
+    height: 60,
+    backgroundColor: "#8B0000",
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 12,
+  },
+  headerTitle: {
+    color: "#fff",
+    fontSize: 20,
+    fontWeight: "700",
+  },
 
-  emptyfav: {
+  /* LIST STYLE */
+  list: {
+    padding: 14,
+    paddingBottom: 50,
+  },
+  cardWrapper: {
+    marginBottom: 16,
+  },
+
+  /* EMPTY STATE */
+  emptyContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
@@ -63,10 +100,10 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     color: "#8B0000",
   },
-  emptySubText: {
-    fontSize: 15,
-    color: "#666",
+  emptySubtitle: {
     marginTop: 6,
+    fontSize: 15,
     textAlign: "center",
+    color: "#555",
   },
 });

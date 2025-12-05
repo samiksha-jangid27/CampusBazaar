@@ -84,12 +84,12 @@ export default function ListingCard({ item, onPress, onFavorite, isFav }) {
           {/* HEART */}
           <IconButton
             icon={isFav ? "heart" : "heart-outline"}
-            size={24}
+            size={18}
             onPress={() => onFavorite(item)}
-            iconColor={isFav ? "#C70039" : "#8B0000"}
-            containerColor="#fff"
-            style={styles.heartBtn}
+            style={styles.iconBtn}
+            iconColor="#8B0000"
           />
+
         </View>
       </View>
     </TouchableOpacity>

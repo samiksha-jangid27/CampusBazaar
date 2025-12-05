@@ -1,28 +1,43 @@
 export const initialState = {
-  listings: [],
-  favorites: [], // ❤️ full objects
-  user: null,
+  favorites: [], // store full objects
 };
 
 export default function appReducer(state, action) {
   switch (action.type) {
-    case "SET_LISTINGS":
-      return { ...state, listings: action.payload };
-
     case "ADD_FAVORITE":
+      // avoid duplicates
+      if (state.favorites.some((item) => item.id === action.payload.id)) {
+        return state;
+      }
       return {
         ...state,
-        favorites: [...state.favorites, action.payload], // add full item
+        favorites: [...state.favorites, action.payload],
       };
 
     case "REMOVE_FAVORITE":
       return {
         ...state,
-        favorites: state.favorites.filter((f) => f.id !== action.payload),
+        favorites: state.favorites.filter(
+          (item) => item.id !== action.payload
+        ),
       };
 
-    case "CLEAR_FAVORITES":
-      return { ...state, favorites: [] };
+    case "TOGGLE_FAVORITE":
+      const exists = state.favorites.find(
+        (item) => item.id === action.payload.id
+      );
+      if (exists) {
+        return {
+          ...state,
+          favorites: state.favorites.filter(
+            (i) => i.id !== action.payload.id
+          ),
+        };
+      }
+      return {
+        ...state,
+        favorites: [...state.favorites, action.payload],
+      };
 
     default:
       return state;
