@@ -1,128 +1,179 @@
+// src/components/ListingCard.js
 import React from "react";
 import {
   View,
   StyleSheet,
   Image,
+  TouchableOpacity,
   Alert,
   Linking,
+  Platform,
 } from "react-native";
-import { Card, Button, IconButton, Text } from "react-native-paper";
+import { Text, IconButton } from "react-native-paper";
+
+// ----------------------------
+// UTIL: OPEN WHATSAPP
+// ----------------------------
+async function openWhatsApp(number, message = "") {
+  if (!number) return Alert.alert("Error", "Seller phone number missing.");
+  const digits = number.replace(/\D/g, "");
+  if (!digits || digits.length < 6) return Alert.alert("Error", "Invalid phone number.");
+
+  let sanitized = digits;
+  if (digits.length <= 10) sanitized = "91" + digits;
+
+  const url = `https://wa.me/${sanitized}?text=${encodeURIComponent(message)}`;
+
+  try {
+    const can = await Linking.canOpenURL(url);
+    if (can) Linking.openURL(url);
+    else Alert.alert("Error", "Unable to open WhatsApp.");
+  } catch (err) {
+    Alert.alert("Error", "Unable to open WhatsApp.");
+  }
+}
 
 export default function ListingCard({ item, onPress, onFavorite, isFav }) {
-  
-  const handleWhatsApp = () => {
-    if (!item?.seller?.phoneNumber) {
-      return Alert.alert("Error", "Seller phone number not available.");
-    }
-
-    const message =
-      item.category === "Services"
-        ? "Hello! I wanted to enquire about this service."
-        : "Hello! Is this product still available?";
-
-    const url = `whatsapp://send?phone=${item.seller.phoneNumber}&text=${encodeURIComponent(
-      message
-    )}`;
-
-    Linking.openURL(url).catch(() =>
-      Alert.alert("Error", "Unable to open WhatsApp.")
-    );
-  };
+  const sellerPhone = item?.seller?.phoneNumber || null;
 
   return (
-    <Card style={styles.card} mode="elevated" onPress={onPress}>
-      <Image
-        source={{ uri: item.images?.[0] || item.image }}
-        style={styles.image}
-      />
+    <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.9}>
+      {/* IMAGE */}
+      <View style={styles.imageWrap}>
+        {item.images?.length ? (
+          <Image source={{ uri: item.images[0] }} style={styles.image} />
+        ) : (
+          <View style={[styles.image, styles.noImg]}>
+            <Text>No image</Text>
+          </View>
+        )}
 
-      <Card.Content style={styles.content}>
+        {/* PRICE */}
+        <View style={styles.priceBadge}>
+          <Text style={styles.priceText}>₹{item.price}</Text>
+        </View>
+      </View>
+
+      {/* CONTENT */}
+      <View style={styles.content}>
         <Text style={styles.title} numberOfLines={2}>
           {item.title}
         </Text>
 
-        <Text style={styles.price}>₹{item.price}</Text>
-      </Card.Content>
+        <Text style={styles.desc} numberOfLines={2}>
+          {item.description}
+        </Text>
 
-      <View style={styles.actions}>
-        {/* Contact Button */}
-        <Button
-          mode="contained"
-          buttonColor="#25D366"
-          textColor="#FFF"
-          style={styles.contactBtn}
-          onPress={handleWhatsApp}
-          icon="whatsapp"
-        >
-          Contact
-        </Button>
+        {/* ACTIONS ROW */}
+        <View style={styles.row}>
+          {/* WHATSAPP */}
+          <IconButton
+            icon="whatsapp"
+            size={22}
+            onPress={() =>
+              openWhatsApp(
+                sellerPhone,
+                `Hi! I'm interested in your listing "${item.title}".`
+              )
+            }
+            iconColor="#fff"
+            containerColor="#25D366"
+            style={styles.actionBtn}
+          />
 
-        {/* View Button */}
-        <Button
-          mode="text"
-          onPress={onPress}
-          textColor="#8B0000"
-          style={styles.viewBtn}
-        >
-          View
-        </Button>
-
-        {/* Favorite Icon */}
-        <IconButton
-          icon={isFav ? "heart" : "heart-outline"}
-          iconColor="#8B0000"
-          size={24}
-          onPress={onFavorite}
-        />
+          {/* HEART */}
+          <IconButton
+            icon={isFav ? "heart" : "heart-outline"}
+            size={24}
+            onPress={() => onFavorite(item)}
+            iconColor={isFav ? "#C70039" : "#8B0000"}
+            containerColor="#fff"
+            style={styles.heartBtn}
+          />
+        </View>
       </View>
-    </Card>
+    </TouchableOpacity>
   );
 }
 
+// ----------------------------
+// STYLES
+// ----------------------------
 const styles = StyleSheet.create({
   card: {
+    backgroundColor: "#fff",
     borderRadius: 14,
-    marginBottom: 16,
-    backgroundColor: "#FFF",
+    overflow: "hidden",
     elevation: 3,
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    marginBottom: 16,
+    width: "100%",
   },
+
+  imageWrap: {
+    width: "100%",
+    height: 150,
+    backgroundColor: "#f2f2f2",
+  },
+
   image: {
     width: "100%",
-    height: 220,
-    borderTopLeftRadius: 14,
-    borderTopRightRadius: 14,
+    height: "100%",
+    resizeMode: "cover",
   },
-  content: {
-    paddingVertical: 10,
-  },
-  title: {
-    fontSize: 17,
-    fontWeight: "600",
-    color: "#222",
-  },
-  price: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#8B0000",
-    marginTop: 6,
-  },
-  actions: {
-    flexDirection: "row",
+
+  noImg: {
+    justifyContent: "center",
     alignItems: "center",
+  },
+
+  priceBadge: {
+    position: "absolute",
+    top: 10,
+    right: 10,
+    backgroundColor: "#8B0000",
     paddingHorizontal: 10,
-    paddingBottom: 10,
-    justifyContent: "space-between",
+    paddingVertical: 5,
+    borderRadius: 20,
   },
-  contactBtn: {
-    flex: 1,
-    marginRight: 8,
-    borderRadius: 8,
+
+  priceText: {
+    color: "#fff",
+    fontWeight: "700",
   },
-  viewBtn: {
-    flex: 1,
-    borderRadius: 8,
+
+  content: {
+    padding: 12,
+  },
+
+  title: {
+    fontSize: 15,
+    fontWeight: "700",
+    color: "#222",
+    marginBottom: 4,
+  },
+
+  desc: {
+    color: "#666",
+    fontSize: 13,
+    marginBottom: 10,
+  },
+
+  row: {
+    flexDirection: "row",
+    justifyContent: "flex-start",
+    alignItems: "center",
+  },
+
+  actionBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 10,
+    marginRight: 6,
+  },
+
+  heartBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 10,
   },
 });

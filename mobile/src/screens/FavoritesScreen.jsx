@@ -1,3 +1,5 @@
+// src/screens/FavoritesScreen.js
+
 import React, { useContext } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { FlatList, Text, StyleSheet, View } from "react-native";
@@ -6,31 +8,37 @@ import ListingCard from "../components/ListingCard";
 
 export default function FavoritesScreen({ navigation }) {
   const { state, dispatch } = useContext(AppContext);
-  const favListings = state.listings.filter((l) =>
-    state.favorites.includes(l.id)
-  );
+
+  // ❤️ favorites ARE FULL ITEMS, not IDs
+  const favListings = state.favorites;
 
   return (
     <SafeAreaView style={styles.safe}>
       {favListings.length === 0 ? (
         <View style={styles.emptyfav}>
-          <Text style={{fontSize: 22,fontWeight: "700", color: "#8B0000",}}>No favorites yet ❤️</Text>
-          <Text style={styles.emptySubText}>Start shopping and add your favorite items!</Text>
+          <Text style={styles.emptyTitle}>No favorites yet ❤️</Text>
+          <Text style={styles.emptySubText}>
+            Start browsing and save your favorite items!
+          </Text>
         </View>
       ) : (
         <FlatList
           data={favListings}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item) => String(item.id)}
           contentContainerStyle={styles.list}
           renderItem={({ item }) => (
             <ListingCard
               item={item}
-              onPress={() => navigation.navigate("Details", { id: item.id })}
-              onFavorite={() =>
-                dispatch({ type: "toggleFavorite", payload: item.id })
+              onPress={() =>
+                navigation.navigate("Details", { id: item.id })
               }
-              isFav
-              onCart={() => dispatch({ type: "addToCart", payload: item })}
+              isFav={true}
+              onFavorite={() =>
+                dispatch({
+                  type: "REMOVE_FAVORITE",
+                  payload: item.id,
+                })
+              }
             />
           )}
         />
@@ -40,13 +48,25 @@ export default function FavoritesScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: "#FFFFFF"},
+  safe: { flex: 1, backgroundColor: "#FFFFFF" },
+
   list: { padding: 10, paddingBottom: 20 },
-  emptyfav: { flex:1, justifyContent:"center" , alignItems: "center" , marginTop: 50, fontSize: 16, color: "#8B0000" },
+
+  emptyfav: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 30,
+  },
+  emptyTitle: {
+    fontSize: 22,
+    fontWeight: "700",
+    color: "#8B0000",
+  },
   emptySubText: {
     fontSize: 15,
     color: "#666",
     marginTop: 6,
     textAlign: "center",
-  }
+  },
 });

@@ -8,7 +8,7 @@ import {
   TouchableOpacity,
   SafeAreaView,
 } from "react-native";
-import { Text, TextInput, Button } from "react-native-paper";
+import { Text, TextInput, Button, IconButton } from "react-native-paper";
 import * as ImagePicker from "expo-image-picker";
 import api from "../services/api";
 
@@ -70,12 +70,20 @@ export default function AddListingScreen({ navigation }) {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#fafafa" }}>
-      <ScrollView contentContainerStyle={styles.container}>
-        {/* HEADER */}
-        <Text style={styles.header}>Create Listing</Text>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
+      {/* 🔥 TITLE BAR (matching your global style) */}
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <IconButton icon="arrow-left" size={26} iconColor="#fff" />
+        </TouchableOpacity>
 
-        {/* CARD WRAPPER */}
+        <Text style={styles.headerTitle}>Create Listing</Text>
+
+        {/* spacer for alignment */}
+        <View style={{ width: 40 }} />
+      </View>
+
+      <ScrollView contentContainerStyle={styles.container}>
         <View style={styles.card}>
           {/* IMAGE UPLOAD */}
           <Text style={styles.sectionLabel}>Upload Images (max 4)</Text>
@@ -175,18 +183,28 @@ export default function AddListingScreen({ navigation }) {
   );
 }
 
+/* -------------------------------------- */
+/*                STYLES                  */
+/* -------------------------------------- */
+
 const styles = StyleSheet.create({
-  container: {
-    padding: 20,
+  /* HEADER */
+  header: {
+    height: 60,
+    backgroundColor: "#8B0000",
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 10,
+    justifyContent: "space-between",
+  },
+  headerTitle: {
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "700",
   },
 
-  header: {
-    fontSize: 28,
-    fontWeight: "700",
-    color: "#8B0000",
-    textAlign: "center",
-    marginBottom: 20,
-  },
+  /* MAIN */
+  container: { padding: 20 },
 
   card: {
     backgroundColor: "#fff",
@@ -205,11 +223,7 @@ const styles = StyleSheet.create({
     color: "#444",
   },
 
-  imageRow: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    marginBottom: 20,
-  },
+  imageRow: { flexDirection: "row", flexWrap: "wrap", marginBottom: 20 },
 
   addImageBox: {
     width: 90,
@@ -249,15 +263,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 5,
   },
 
-  input: {
-    marginBottom: 15,
-  },
+  input: { marginBottom: 15 },
 
-  // CATEGORY BUTTONS
-  categoryRow: {
-    flexDirection: "row",
-    marginBottom: 20,
-  },
+  categoryRow: { flexDirection: "row", marginBottom: 20 },
 
   categoryBtn: {
     flex: 1,
@@ -275,16 +283,9 @@ const styles = StyleSheet.create({
     backgroundColor: "#ffeaea",
   },
 
-  categoryText: {
-    fontSize: 16,
-    fontWeight: "500",
-    color: "#555",
-  },
+  categoryText: { fontSize: 16, fontWeight: "500", color: "#555" },
 
-  categoryTextSelected: {
-    color: "#8B0000",
-    fontWeight: "700",
-  },
+  categoryTextSelected: { color: "#8B0000", fontWeight: "700" },
 
   submitBtn: {
     backgroundColor: "#8B0000",

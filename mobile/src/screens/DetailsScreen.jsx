@@ -1,185 +1,268 @@
-import React, { useContext, useEffect, useState } from "react";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { StyleSheet, View, ScrollView, Image, ActivityIndicator, Linking, Alert } from "react-native";
-import { Appbar, Button, Text, IconButton, Divider } from "react-native-paper";
-import { AppContext } from "../contexts/AppProvider";
+import React, { useEffect, useState } from "react";
+import {
+  View,
+  Image,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  Linking,
+  Alert,
+} from "react-native";
+import { Text, IconButton } from "react-native-paper";
 import api from "../services/api";
 
-export default function DetailsScreen({ route, navigation }) {
-  const { id } = route.params || {};
-  const { state, dispatch } = useContext(AppContext);
+export default function ProductDetailsScreen({ route, navigation }) {
+  const { id } = route.params;
   const [item, setItem] = useState(null);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchListingDetails();
-  }, [id]);
+    fetchItem();
+  }, []);
 
-  const fetchListingDetails = async () => {
+  const fetchItem = async () => {
     try {
-      const response = await api.get(`/listings/${id}`);
-      setItem(response.data);
-    } catch (error) {
-      console.error("Error fetching listing details:", error);
-    } finally {
-      setLoading(false);
+      const res = await api.get(`/listings/${id}`);
+      setItem(res.data);
+    } catch (err) {
+      console.log("Details error", err);
     }
   };
 
-  const handleWhatsApp = () => {
-    if (!item?.seller?.phoneNumber) {
-      return Alert.alert("Info", "Seller phone number not available");
-    }
-
-    // 🔥 smart messaging
-    const message =
-      item.category === "Services"
-        ? "Hello! I wanted to enquire about this service."
-        : "Hello! Is this product still available?";
-
-    const url = `whatsapp://send?phone=${item.seller.phoneNumber}&text=${encodeURIComponent(message)}`;
-
-    Linking.canOpenURL(url)
-      .then((supported) => {
-        if (!supported) Alert.alert("Error", "WhatsApp is not installed");
-        else Linking.openURL(url);
-      })
-      .catch((err) => console.error("Error opening WhatsApp:", err));
-  };
-
-  if (loading) {
+  if (!item) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#8B0000" />
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <Text>Loading...</Text>
       </View>
     );
   }
 
-  if (!item) {
-    return (
-      <SafeAreaView style={styles.safe}>
-        <Appbar.Header style={styles.header}>
-          <Appbar.BackAction color="#FFF" onPress={() => navigation.goBack()} />
-          <Appbar.Content title="Details" color="#FFF" />
-        </Appbar.Header>
+  const seller = item.seller;
+  const initials = seller.name
+    ?.split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase();
 
-        <View style={styles.missingWrap}>
-          <Text style={styles.missingText}>Item not found.</Text>
-        </View>
-      </SafeAreaView>
+  const handleWhatsApp = () => {
+    if (!seller.phoneNumber) {
+      return Alert.alert("No Phone", "Seller has not added a phone number.");
+    }
+
+    const number = seller.phoneNumber.replace(/\D/g, "");
+    const url = `https://wa.me/91${number}?text=Hi ${seller.name}, I'm interested in your listing "${item.title}"`;
+
+    Linking.openURL(url).catch(() =>
+      Alert.alert("Error", "Unable to open WhatsApp.")
     );
-  }
-
-  const listingId = item.id;
-  const isFav = state.favorites.includes(listingId);
+  };
 
   return (
-    <SafeAreaView style={styles.safe}>
-      <Appbar.Header style={styles.header}>
-        <Appbar.BackAction color="#FFF" onPress={() => navigation.goBack()} />
-        <Appbar.Content title="Product Details" color="#FFF" />
-      </Appbar.Header>
+    <View style={{ flex: 1, backgroundColor: "#fff" }}>
+      {/* HEADER */}
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <IconButton icon="arrow-left" size={26} iconColor="#fff" />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Product Details</Text>
+        <View style={{ width: 40 }} />
+      </View>
 
-      <ScrollView contentContainerStyle={styles.scroll}>
+      {/* CONTENT */}
+      <ScrollView contentContainerStyle={styles.container}>
         <Image
-          source={{ uri: item.images?.[0] || "https://via.placeholder.com/300" }}
-          style={styles.image}
+          source={{ uri: item.images?.[0] }}
+          style={styles.mainImage}
         />
 
-        <View style={styles.content}>
+        <View style={styles.infoBox}>
           <Text style={styles.title}>{item.title}</Text>
-          <Text style={styles.price}>₹{item.price.toFixed(2)}</Text>
 
+          <Text style={styles.price}>₹{item.price}</Text>
           <Text style={styles.category}>
-            {item.category}
-            {item.subcategory ? ` • ${item.subcategory}` : ""}
+            {item.category} · {item.subcategory}
           </Text>
 
-          <Divider style={styles.divider} />
+          <Text style={styles.sectionLabel}>Description</Text>
+          <Text style={styles.description}>{item.description}</Text>
 
-          <Text style={styles.sectionTitle}>Description</Text>
-          <Text style={styles.desc}>
-            {item.description || "No description available."}
-          </Text>
+          {/* SELLER INFO */}
+          <Text style={styles.sectionLabel}>Seller Info</Text>
 
-          <Divider style={styles.divider} />
+          <View style={styles.sellerRow}>
+            <View style={styles.sellerAvatar}>
+              <Text style={styles.sellerInitials}>{initials}</Text>
+            </View>
 
-          <Text style={styles.sectionTitle}>Seller Info</Text>
-          <View style={styles.sellerInfo}>
-            <Text style={styles.sellerName}>
-              {item.seller?.name || "Unknown Seller"}
-            </Text>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.sellerName}>{seller.name}</Text>
+              <Text style={styles.sellerEmail}>{seller.email}</Text>
+              {seller.phoneNumber ? (
+                <Text style={styles.sellerPhone}>+91 {seller.phoneNumber}</Text>
+              ) : null}
+            </View>
 
-            {item.seller?.phoneNumber && (
-              <Button
-                mode="outlined"
-                icon="whatsapp"
-                textColor="#25D366"
-                style={{ borderColor: "#25D366" }}
-                onPress={handleWhatsApp}
-              >
-                Chat Now
-              </Button>
-            )}
+            {/* Chat Button */}
+            <TouchableOpacity style={styles.chatBtn} onPress={handleWhatsApp}>
+              <Text style={styles.chatText}>💬 Chat</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </ScrollView>
 
+      {/* FOOTER BAR */}
       <View style={styles.footer}>
-        <IconButton
-          icon={isFav ? "heart" : "heart-outline"}
-          size={24}
-          iconColor="#8B0000"
-          onPress={() =>
-            dispatch({ type: "toggleFavorite", payload: listingId })
-          }
-        />
+        <TouchableOpacity style={styles.heartBtn}>
+          <IconButton icon="heart-outline" size={28} iconColor="#8B0000" />
+        </TouchableOpacity>
 
-        <Button
-          mode="contained"
-          buttonColor="#25D366"
-          textColor="#FFFFFF"
-          style={styles.contactBtn}
-          icon="whatsapp"
-          onPress={handleWhatsApp}
-        >
-          Contact Seller
-        </Button>
+        <TouchableOpacity style={styles.contactBtn} onPress={handleWhatsApp}>
+          <Text style={styles.contactBtnText}>💬 Contact Seller</Text>
+        </TouchableOpacity>
       </View>
-    </SafeAreaView>
+    </View>
   );
 }
 
+/* ------------------------- STYLES ------------------------- */
+
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: "#FFFFFF" },
-  header: { backgroundColor: "#8B0000" },
-  scroll: { paddingBottom: 20 },
-  image: { width: "100%", height: 300, backgroundColor: "#EEE" },
-  content: { padding: 16 },
-  title: { fontSize: 22, fontWeight: "bold", color: "#222" },
-  price: { fontSize: 20, fontWeight: "700", color: "#8B0000", marginVertical: 6 },
-  category: { fontSize: 14, color: "#666", marginBottom: 12 },
-  divider: { marginVertical: 12 },
-  sectionTitle: { fontSize: 16, fontWeight: "600", marginBottom: 6 },
-  desc: { fontSize: 15, color: "#555", lineHeight: 22 },
-  sellerInfo: {
+  header: {
+    height: 60,
+    backgroundColor: "#8B0000",
     flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
-    marginTop: 5,
+    paddingHorizontal: 10,
+    justifyContent: "space-between",
   },
-  sellerName: { fontSize: 16, fontWeight: "500" },
+  headerTitle: {
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "700",
+  },
+
+  container: {
+    paddingBottom: 120,
+  },
+
+  mainImage: {
+    width: "100%",
+    height: 260,
+    backgroundColor: "#eee",
+  },
+
+  infoBox: {
+    padding: 16,
+  },
+
+  title: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#222",
+  },
+  price: {
+    fontSize: 22,
+    fontWeight: "700",
+    color: "#8B0000",
+    marginTop: 4,
+  },
+  category: {
+    fontSize: 14,
+    color: "#777",
+    marginTop: 4,
+  },
+
+  sectionLabel: {
+    marginTop: 16,
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#8B0000",
+  },
+  description: {
+    marginTop: 4,
+    fontSize: 14,
+    color: "#444",
+  },
+
+  sellerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 10,
+  },
+
+  sellerAvatar: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: "#8B0000",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 12,
+  },
+  sellerInitials: {
+    color: "#fff",
+    fontWeight: "700",
+    fontSize: 16,
+  },
+  sellerName: {
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  sellerEmail: {
+    fontSize: 13,
+    color: "#666",
+  },
+  sellerPhone: {
+    fontSize: 13,
+    color: "#444",
+  },
+
+  chatBtn: {
+    borderWidth: 1,
+    borderColor: "#25D366",
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
+  },
+  chatText: {
+    color: "#25D366",
+    fontWeight: "600",
+  },
+
   footer: {
+    position: "absolute",
+    bottom: 0,
+    width: "100%",
     flexDirection: "row",
+    padding: 12,
+    backgroundColor: "#fff",
+    borderTopWidth: 1,
+    borderColor: "#eee",
     alignItems: "center",
-    justifyContent: "space-between",
-    padding: 14,
-    borderTopWidth: 0.6,
-    borderColor: "#E5E5E5",
-    backgroundColor: "#FFFFFF",
   },
-  contactBtn: { flex: 1, marginLeft: 10, borderRadius: 10 },
-  missingWrap: { flex: 1, alignItems: "center", justifyContent: "center" },
-  missingText: { fontSize: 18, color: "#8B0000", fontWeight: "600" },
-  loadingContainer: { flex: 1, justifyContent: "center", alignItems: "center" },
+
+  heartBtn: {
+    width: 55,
+    height: 55,
+    borderRadius: 28,
+    borderWidth: 1.5,
+    borderColor: "#8B0000",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 12,
+  },
+
+  contactBtn: {
+    flex: 1,
+    backgroundColor: "#25D366",
+    height: 55,
+    borderRadius: 12,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  contactBtnText: {
+    color: "#fff",
+    fontSize: 17,
+    fontWeight: "700",
+  },
 });

@@ -1,32 +1,28 @@
 export const initialState = {
-  listings: [],        // 🟢 Loaded from backend only
-  favorites: [],       // 🟢 Stored locally for quick UI update
+  listings: [],
+  favorites: [], // ❤️ full objects
+  user: null,
 };
 
 export default function appReducer(state, action) {
   switch (action.type) {
-    
-    // Save listings from backend
-    case "setListings":
+    case "SET_LISTINGS":
+      return { ...state, listings: action.payload };
+
+    case "ADD_FAVORITE":
       return {
         ...state,
-        listings: action.payload,
+        favorites: [...state.favorites, action.payload], // add full item
       };
 
-    // Add/remove from favorites
-    case "toggleFavorite": {
-      const id = action.payload;
+    case "REMOVE_FAVORITE":
+      return {
+        ...state,
+        favorites: state.favorites.filter((f) => f.id !== action.payload),
+      };
 
-      return state.favorites.includes(id)
-        ? {
-            ...state,
-            favorites: state.favorites.filter(f => f !== id),
-          }
-        : {
-            ...state,
-            favorites: [...state.favorites, id],
-          };
-    }
+    case "CLEAR_FAVORITES":
+      return { ...state, favorites: [] };
 
     default:
       return state;
