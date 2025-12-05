@@ -5,24 +5,29 @@ import {
   StyleSheet,
   TouchableOpacity,
   Image,
+  Alert,
 } from "react-native";
 import { Avatar, Button, Card, Text, TextInput } from "react-native-paper";
 import * as ImagePicker from "expo-image-picker";
 import { AppContext } from "../contexts/AppProvider";
+import api from "../services/api";
 
 export default function ProfileScreen() {
-  const { state } = useContext(AppContext);
+  const { state, setUser } = useContext(AppContext);
 
   const [editing, setEditing] = useState(false);
-  const [profileImage, setProfileImage] = useState(state.user?.profilePicture || null);
+  const [profileImage, setProfileImage] = useState(
+    state.user?.profilePicture || null
+  );
   const [name, setName] = useState(state.user?.name || "");
   const [phone, setPhone] = useState(state.user?.phoneNumber || "");
 
+  // INITIALS LOGIC
   const initials = useMemo(() => {
-    if (profileImage) return ""; // hide initials when image exists
+    if (profileImage && profileImage !== "") return ""; // hide initials when image exists
 
-    const name = state.user?.name || "User";
-    return name
+    const userName = state.user?.name || "User";
+    return userName
       .split(" ")
       .map((n) => n[0])
       .slice(0, 2)
@@ -30,7 +35,7 @@ export default function ProfileScreen() {
       .toUpperCase();
   }, [state.user, profileImage]);
 
-  // PICK IMAGE
+  // IMAGE PICKER
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       allowsEditing: true,
@@ -43,41 +48,77 @@ export default function ProfileScreen() {
     }
   };
 
-  const handleSave = () => {
-    // This will be connected to backend later
-    console.log("Saving profile:");
-    console.log({ name, phone, profileImage });
+  // SAVE PROFILE (NAME + NUMBER + IMAGE)
+  const handleSave = async () => {
+    try {
+      const formData = new FormData();
 
-    setEditing(false);
+      formData.append("name", name);
+      formData.append("phoneNumber", phone);
+
+      if (profileImage && !profileImage.startsWith("http")) {
+        // a new image was selected
+        const fileExt = profileImage.split(".").pop();
+        formData.append("profilePicture", {
+          uri: profileImage,
+          name: `profile.${fileExt}`,
+          type: `image/${fileExt}`,
+        });
+      }
+
+      const res = await api.put("/users/profile", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      setUser(res.data.user); // update global context
+      Alert.alert("Success", "Profile updated successfully!");
+      setEditing(false);
+    } catch (error) {
+      console.log("Update error:", error);
+      Alert.alert("Error", "Failed to update profile");
+    }
   };
 
   return (
     <SafeAreaView style={styles.safe}>
       <View style={styles.header}>
+        {/* PROFILE PHOTO BUTTON */}
         <TouchableOpacity onPress={pickImage}>
           {profileImage ? (
-            <Image source={{ uri: profileImage }} style={styles.profilePhoto} />
+            <Image
+              source={{ uri: profileImage }}
+              style={styles.profilePhoto}
+              onError={() => setProfileImage(null)} // fallback
+            />
           ) : (
-            <Avatar.Text label={initials} size={80} color="#FFFFFF" style={styles.avatar} />
+            <Avatar.Text
+              label={initials}
+              size={90}
+              color="#FFFFFF"
+              style={styles.avatar}
+            />
           )}
         </TouchableOpacity>
 
+        {/* EDITING MODE */}
         {editing ? (
           <>
             <TextInput
+              label="Name"
               mode="outlined"
+              style={styles.editInput}
               value={name}
               onChangeText={setName}
-              style={styles.editInput}
-              label="Name"
             />
 
             <TextInput
+              label="Phone Number"
               mode="outlined"
+              style={styles.editInput}
               value={phone}
               onChangeText={setPhone}
-              style={styles.editInput}
-              label="Phone Number"
               keyboardType="numeric"
             />
           </>
@@ -92,6 +133,7 @@ export default function ProfileScreen() {
         )}
       </View>
 
+      {/* ACCOUNT STATS CARD */}
       <View style={styles.content}>
         <Card style={styles.card} mode="elevated">
           <Card.Content>
@@ -109,6 +151,7 @@ export default function ProfileScreen() {
           </Card.Content>
         </Card>
 
+        {/* EDIT / SAVE BUTTON */}
         {editing ? (
           <Button
             mode="contained"
@@ -131,12 +174,13 @@ export default function ProfileScreen() {
           </Button>
         )}
 
+        {/* LOG OUT */}
         {!editing && (
           <Button
             mode="outlined"
             textColor="#8B0000"
             style={styles.btnOutline}
-            onPress={() => console.log("Logout pressed")}
+            onPress={() => Alert.alert("Logout", "Implement logout logic")}
           >
             Log out
           </Button>
@@ -147,11 +191,14 @@ export default function ProfileScreen() {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: "#FFFFFF" },
+  safe: {
+    flex: 1,
+    backgroundColor: "#FFFFFF",
+  },
 
   header: {
     alignItems: "center",
-    paddingTop: 24,
+    paddingTop: 28,
     paddingBottom: 16,
   },
 
@@ -160,9 +207,9 @@ const styles = StyleSheet.create({
   },
 
   profilePhoto: {
-    width: 90,
-    height: 90,
-    borderRadius: 45,
+    width: 95,
+    height: 95,
+    borderRadius: 48,
     backgroundColor: "#eee",
   },
 
@@ -215,8 +262,16 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
 
-  rowLabel: { fontSize: 15, color: "#333" },
-  rowValue: { fontSize: 15, color: "#8B0000", fontWeight: "600" },
+  rowLabel: {
+    fontSize: 15,
+    color: "#333",
+  },
+
+  rowValue: {
+    fontSize: 15,
+    color: "#8B0000",
+    fontWeight: "600",
+  },
 
   btn: {
     borderRadius: 10,
