@@ -4,26 +4,27 @@ import { View, StyleSheet, Alert } from 'react-native';
 import { Text, TextInput, Button } from 'react-native-paper';
 import { AuthContext } from '../contexts/AuthContext';
 
+
 export default function OTPVerificationScreen({ route, navigation }) {
   const { email, mode } = route.params; // mode: 'signup' or 'reset'
   const { verifySignupOTP, resetPassword } = useContext(AuthContext);
   const [otp, setOtp] = useState('');
   const [loading, setLoading] = useState(false);
-
+  const { login } = useContext(AuthContext);
   const handleVerifySignup = async () => {
+   
     if (!otp) return Alert.alert('Enter OTP');
     setLoading(true);
     const res = await verifySignupOTP(email, otp);
     setLoading(false);
     if (res.success) {
       Alert.alert('Success', 'Your account is verified!');
-      navigation.replace('MainTabs');
+      login(res.user);   // triggers navigation automatically
+
     } else {
       Alert.alert('Verification failed', res.message);
     }
   };
-
-  // If you want combined screen for reset, you could call reset flow here.
 
   return (
     <View style={styles.container}>

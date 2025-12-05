@@ -10,9 +10,10 @@ import {
 import { Avatar, Button, Card, Text, TextInput } from "react-native-paper";
 import * as ImagePicker from "expo-image-picker";
 import { AppContext } from "../contexts/AppProvider";
-import api from "../services/api";
+import { AuthContext } from "../contexts/AuthContext";
 
-export default function ProfileScreen() {
+
+export default function ProfileScreen({navigation}) {
   const { state, setUser } = useContext(AppContext);
 
   const [editing, setEditing] = useState(false);
@@ -22,7 +23,7 @@ export default function ProfileScreen() {
   const [name, setName] = useState(state.user?.name || "");
   const [phone, setPhone] = useState(state.user?.phoneNumber || "");
 
-  // INITIALS LOGIC
+  // INITIALS DISPLAY LOGIC
   const initials = useMemo(() => {
     if (profileImage && profileImage !== "") return ""; // hide initials when image exists
 
@@ -35,7 +36,7 @@ export default function ProfileScreen() {
       .toUpperCase();
   }, [state.user, profileImage]);
 
-  // IMAGE PICKER
+  // PICK IMAGE
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       allowsEditing: true,
@@ -48,49 +49,30 @@ export default function ProfileScreen() {
     }
   };
 
-  // SAVE PROFILE (NAME + NUMBER + IMAGE)
-  const handleSave = async () => {
-    try {
-      const formData = new FormData();
+  // SAVE ONLY LOCALLY (no backend)
+  const handleSave = () => {
+    const updated = {
+      ...state.user,
+      name,
+      phoneNumber: phone,
+      profilePicture: profileImage,
+    };
 
-      formData.append("name", name);
-      formData.append("phoneNumber", phone);
-
-      if (profileImage && !profileImage.startsWith("http")) {
-        // a new image was selected
-        const fileExt = profileImage.split(".").pop();
-        formData.append("profilePicture", {
-          uri: profileImage,
-          name: `profile.${fileExt}`,
-          type: `image/${fileExt}`,
-        });
-      }
-
-      const res = await api.put("/users/profile", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-
-      setUser(res.data.user); // update global context
-      Alert.alert("Success", "Profile updated successfully!");
-      setEditing(false);
-    } catch (error) {
-      console.log("Update error:", error);
-      Alert.alert("Error", "Failed to update profile");
-    }
+    setUser(updated); // update context only
+    Alert.alert("Saved", "Profile updated locally.");
+    setEditing(false);
   };
+  const { logout } = useContext(AuthContext);
 
   return (
     <SafeAreaView style={styles.safe}>
       <View style={styles.header}>
-        {/* PROFILE PHOTO BUTTON */}
         <TouchableOpacity onPress={pickImage}>
           {profileImage ? (
             <Image
               source={{ uri: profileImage }}
               style={styles.profilePhoto}
-              onError={() => setProfileImage(null)} // fallback
+              onError={() => setProfileImage(null)}
             />
           ) : (
             <Avatar.Text
@@ -102,7 +84,6 @@ export default function ProfileScreen() {
           )}
         </TouchableOpacity>
 
-        {/* EDITING MODE */}
         {editing ? (
           <>
             <TextInput
@@ -133,7 +114,6 @@ export default function ProfileScreen() {
         )}
       </View>
 
-      {/* ACCOUNT STATS CARD */}
       <View style={styles.content}>
         <Card style={styles.card} mode="elevated">
           <Card.Content>
@@ -151,7 +131,6 @@ export default function ProfileScreen() {
           </Card.Content>
         </Card>
 
-        {/* EDIT / SAVE BUTTON */}
         {editing ? (
           <Button
             mode="contained"
@@ -174,13 +153,15 @@ export default function ProfileScreen() {
           </Button>
         )}
 
-        {/* LOG OUT */}
         {!editing && (
           <Button
             mode="outlined"
             textColor="#8B0000"
             style={styles.btnOutline}
-            onPress={() => Alert.alert("Logout", "Implement logout logic")}
+            onPress={() => {
+              logout();                 // clears user in AuthContext
+              navigation.replace("Login"); // immediately jumps to login
+            }}
           >
             Log out
           </Button>
@@ -191,10 +172,7 @@ export default function ProfileScreen() {
 }
 
 const styles = StyleSheet.create({
-  safe: {
-    flex: 1,
-    backgroundColor: "#FFFFFF",
-  },
+  safe: { flex: 1, backgroundColor: "#FFFFFF" },
 
   header: {
     alignItems: "center",
@@ -262,16 +240,8 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
 
-  rowLabel: {
-    fontSize: 15,
-    color: "#333",
-  },
-
-  rowValue: {
-    fontSize: 15,
-    color: "#8B0000",
-    fontWeight: "600",
-  },
+  rowLabel: { fontSize: 15, color: "#333" },
+  rowValue: { fontSize: 15, color: "#8B0000", fontWeight: "600" },
 
   btn: {
     borderRadius: 10,
