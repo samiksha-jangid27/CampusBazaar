@@ -2,7 +2,6 @@ import React, { useContext } from "react";
 import { NavigationContainer, DefaultTheme } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { createDrawerNavigator } from "@react-navigation/drawer";
 import { ActivityIndicator, View } from "react-native";
 
 import HomeScreen from "../screens/HomeScreen";
@@ -20,12 +19,11 @@ import ResetPasswordScreen from "../screens/ResetPasswordScreen";
 
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { AuthContext } from "../contexts/AuthContext";
-import CustomDrawerContent from "./CustomDrawerContent";
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
-const Drawer = createDrawerNavigator();
 
+// THEME
 const navTheme = {
   ...DefaultTheme,
   colors: {
@@ -39,7 +37,7 @@ const navTheme = {
 };
 
 /* ------------------------------ */
-/*     BOTTOM TABS (WITH ADD)     */
+/*        BOTTOM TAB NAV          */
 /* ------------------------------ */
 function Tabs() {
   return (
@@ -63,23 +61,22 @@ function Tabs() {
               color={color}
             />
           ),
-          headerShown: false,
         }}
       />
 
       <Tab.Screen
-        name="AddListing"
+        name="AddListingTab"
         component={AddListingScreen}
         options={{
           title: "Add",
           tabBarIcon: ({ color }) => (
-            <MaterialCommunityIcons name="plus-circle" size={34} color={color} />
+            <MaterialCommunityIcons name="plus-circle" size={32} color={color} />
           ),
         }}
       />
 
       <Tab.Screen
-        name="Favorites"
+        name="FavoritesTab"
         component={FavoritesScreen}
         options={{
           title: "Favorites",
@@ -112,40 +109,10 @@ function Tabs() {
 }
 
 /* ------------------------------ */
-/*      DRAWER MENU (wrap tabs)   */
-/* ------------------------------ */
-function DrawerMenu({ logout }) {
-  return (
-    <Drawer.Navigator
-      drawerContent={(props) => <CustomDrawerContent {...props} logout={logout} />}
-      screenOptions={{
-        headerShown: false,
-        drawerActiveTintColor: "#8B0000",
-        drawerInactiveTintColor: "#333",
-        drawerActiveBackgroundColor: "#fff2f2",
-      }}
-    >
-      <Drawer.Screen name="Home" component={Tabs} />
-      <Drawer.Screen
-        name="Products"
-        component={HomeScreen}
-        initialParams={{ category: "Products" }}
-      />
-      <Drawer.Screen
-        name="Services"
-        component={HomeScreen}
-        initialParams={{ category: "Services" }}
-      />
-      <Drawer.Screen name="Profile" component={ProfileScreen} />
-    </Drawer.Navigator>
-  );
-}
-
-/* ------------------------------ */
-/*          MAIN NAVIGATOR        */
+/*         MAIN NAVIGATOR         */
 /* ------------------------------ */
 export default function AppNavigator() {
-  const { user, loading, logout } = useContext(AuthContext);
+  const { user, loading } = useContext(AuthContext);
 
   if (loading) {
     return (
@@ -158,7 +125,7 @@ export default function AppNavigator() {
   return (
     <NavigationContainer theme={navTheme}>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
-        {/* AUTH FLOW */}
+        {/* PUBLIC SCREENS */}
         {!user ? (
           <>
             <Stack.Screen name="Login" component={LoginScreen} />
@@ -169,14 +136,11 @@ export default function AppNavigator() {
           </>
         ) : (
           <>
-            {/* MAIN APP -> Drawer (wraps Tabs) */}
-            <Stack.Screen name="MainApp">
-              {() => <DrawerMenu logout={logout} />}
-            </Stack.Screen>
+            {/* MAIN APP (TABS ONLY — NO DRAWER) */}
+            <Stack.Screen name="MainTabs" component={Tabs} />
 
-            {/* Deep screens */}
+            {/* DETAILS / EXTRA SCREENS */}
             <Stack.Screen name="Details" component={DetailsScreen} />
-            {/* Keep AddListing in stack too so navigation.push works */}
             <Stack.Screen name="AddListing" component={AddListingScreen} />
           </>
         )}

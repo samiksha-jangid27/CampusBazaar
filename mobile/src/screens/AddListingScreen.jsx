@@ -6,24 +6,22 @@ import {
   Alert,
   Image,
   TouchableOpacity,
+  SafeAreaView,
 } from "react-native";
-import { Text, TextInput, Button, SegmentedButtons, useTheme } from "react-native-paper";
+import { Text, TextInput, Button } from "react-native-paper";
 import * as ImagePicker from "expo-image-picker";
 import api from "../services/api";
 
 export default function AddListingScreen({ navigation }) {
-  const { colors } = useTheme();
-
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
   const [category, setCategory] = useState("Products");
   const [subcategory, setSubcategory] = useState("");
-  const [images, setImages] = useState([]); // store max 4 images
-
+  const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // --- PICK IMAGES ---
+  // --- PICK IMAGE ---
   const pickImage = async () => {
     if (images.length >= 4) {
       return Alert.alert("Limit reached", "You can upload up to 4 images.");
@@ -55,7 +53,7 @@ export default function AddListingScreen({ navigation }) {
       price: parseFloat(price),
       category,
       subcategory,
-      images, // array of URIs
+      images,
     };
 
     setLoading(true);
@@ -72,103 +70,134 @@ export default function AddListingScreen({ navigation }) {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.header}>Create a New Listing</Text>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#fafafa" }}>
+      <ScrollView contentContainerStyle={styles.container}>
+        {/* HEADER */}
+        <Text style={styles.header}>Create Listing</Text>
 
-      {/* IMAGE UPLOAD SECTION */}
-      <Text style={styles.sectionLabel}>Upload Images (max 4)</Text>
+        {/* CARD WRAPPER */}
+        <View style={styles.card}>
+          {/* IMAGE UPLOAD */}
+          <Text style={styles.sectionLabel}>Upload Images (max 4)</Text>
 
-      <View style={styles.imageRow}>
-        {images.map((uri, index) => (
-          <View key={index} style={styles.imageWrapper}>
-            <Image source={{ uri }} style={styles.image} />
-            <TouchableOpacity
-              style={styles.removeBtn}
-              onPress={() => removeImage(index)}
-            >
-              <Text style={{ color: "#fff", fontWeight: "bold" }}>X</Text>
-            </TouchableOpacity>
+          <View style={styles.imageRow}>
+            {images.map((uri, index) => (
+              <View key={index} style={styles.imageWrapper}>
+                <Image source={{ uri }} style={styles.image} />
+                <TouchableOpacity
+                  style={styles.removeBtn}
+                  onPress={() => removeImage(index)}
+                >
+                  <Text style={{ color: "#fff", fontWeight: "bold" }}>X</Text>
+                </TouchableOpacity>
+              </View>
+            ))}
+
+            {images.length < 4 && (
+              <TouchableOpacity style={styles.addImageBox} onPress={pickImage}>
+                <Text style={styles.addImageText}>+</Text>
+              </TouchableOpacity>
+            )}
           </View>
-        ))}
 
-        {images.length < 4 && (
-          <TouchableOpacity style={styles.addImageBox} onPress={pickImage}>
-            <Text style={styles.addImageText}>+</Text>
-          </TouchableOpacity>
-        )}
-      </View>
+          {/* INPUTS */}
+          <TextInput
+            label="Title"
+            mode="outlined"
+            value={title}
+            onChangeText={setTitle}
+            style={styles.input}
+          />
 
-      {/* INPUTS */}
-      <TextInput
-        label="Title"
-        mode="outlined"
-        value={title}
-        onChangeText={setTitle}
-        style={styles.input}
-      />
+          <TextInput
+            label="Description"
+            mode="outlined"
+            multiline
+            numberOfLines={3}
+            value={description}
+            onChangeText={setDescription}
+            style={styles.input}
+          />
 
-      <TextInput
-        label="Description"
-        mode="outlined"
-        multiline
-        numberOfLines={3}
-        value={description}
-        onChangeText={setDescription}
-        style={styles.input}
-      />
+          <TextInput
+            label="Price (₹)"
+            mode="outlined"
+            keyboardType="numeric"
+            value={price}
+            onChangeText={setPrice}
+            style={styles.input}
+          />
 
-      <TextInput
-        label="Price (₹)"
-        mode="outlined"
-        keyboardType="numeric"
-        value={price}
-        onChangeText={setPrice}
-        style={styles.input}
-      />
+          {/* CATEGORY */}
+          <Text style={styles.sectionLabel}>Category</Text>
 
-      <Text style={styles.sectionLabel}>Category</Text>
-      <SegmentedButtons
-        value={category}
-        onValueChange={setCategory}
-        buttons={[
-          { label: "Products", value: "Products" },
-          { label: "Services", value: "Services" },
-        ]}
-        style={styles.segment}
-      />
+          <View style={styles.categoryRow}>
+            {["Products", "Services"].map((item) => (
+              <TouchableOpacity
+                key={item}
+                style={[
+                  styles.categoryBtn,
+                  category === item && styles.categorySelected,
+                ]}
+                onPress={() => setCategory(item)}
+              >
+                <Text
+                  style={[
+                    styles.categoryText,
+                    category === item && styles.categoryTextSelected,
+                  ]}
+                >
+                  {item}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
 
-      <TextInput
-        label="Subcategory (Books, Tutoring...)"
-        mode="outlined"
-        value={subcategory}
-        onChangeText={setSubcategory}
-        style={styles.input}
-      />
+          <TextInput
+            label="Subcategory (Books, Tutoring...)"
+            mode="outlined"
+            value={subcategory}
+            onChangeText={setSubcategory}
+            style={styles.input}
+          />
 
-      <Button
-        mode="contained"
-        onPress={handleSubmit}
-        loading={loading}
-        style={styles.submitBtn}
-      >
-        Create Listing
-      </Button>
-    </ScrollView>
+          <Button
+            mode="contained"
+            onPress={handleSubmit}
+            loading={loading}
+            style={styles.submitBtn}
+          >
+            Create Listing
+          </Button>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     padding: 20,
-    backgroundColor: "#fff",
   },
+
   header: {
-    fontSize: 26,
+    fontSize: 28,
     fontWeight: "700",
     color: "#8B0000",
     textAlign: "center",
     marginBottom: 20,
   },
+
+  card: {
+    backgroundColor: "#fff",
+    padding: 20,
+    borderRadius: 16,
+    elevation: 3,
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+  },
+
   sectionLabel: {
     fontSize: 16,
     fontWeight: "600",
@@ -176,37 +205,41 @@ const styles = StyleSheet.create({
     color: "#444",
   },
 
-  // IMAGE UPLOAD
   imageRow: {
     flexDirection: "row",
     flexWrap: "wrap",
     marginBottom: 20,
   },
+
   addImageBox: {
     width: 90,
     height: 90,
-    backgroundColor: "#F0F0F0",
-    borderRadius: 10,
+    backgroundColor: "#eee",
+    borderRadius: 12,
     justifyContent: "center",
     alignItems: "center",
     marginRight: 10,
   },
+
   addImageText: {
     fontSize: 32,
     color: "#8B0000",
     fontWeight: "700",
   },
+
   imageWrapper: {
     width: 90,
     height: 90,
     marginRight: 10,
     marginBottom: 10,
   },
+
   image: {
     width: "100%",
     height: "100%",
-    borderRadius: 10,
+    borderRadius: 12,
   },
+
   removeBtn: {
     position: "absolute",
     top: -5,
@@ -216,14 +249,41 @@ const styles = StyleSheet.create({
     paddingHorizontal: 5,
   },
 
-  // INPUTS
   input: {
     marginBottom: 15,
-    backgroundColor: "#fff",
   },
 
-  segment: {
+  // CATEGORY BUTTONS
+  categoryRow: {
+    flexDirection: "row",
     marginBottom: 20,
+  },
+
+  categoryBtn: {
+    flex: 1,
+    paddingVertical: 12,
+    marginHorizontal: 5,
+    borderRadius: 10,
+    borderWidth: 1.5,
+    borderColor: "#ccc",
+    backgroundColor: "#f9f9f9",
+    alignItems: "center",
+  },
+
+  categorySelected: {
+    borderColor: "#8B0000",
+    backgroundColor: "#ffeaea",
+  },
+
+  categoryText: {
+    fontSize: 16,
+    fontWeight: "500",
+    color: "#555",
+  },
+
+  categoryTextSelected: {
+    color: "#8B0000",
+    fontWeight: "700",
   },
 
   submitBtn: {

@@ -1,7 +1,6 @@
 import React from "react";
 import { Provider as PaperProvider } from "react-native-paper";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 import { AppProvider } from "./src/contexts/AppProvider";
 import { AuthProvider } from "./src/contexts/AuthContext";
@@ -22,7 +21,6 @@ const theme = {
 
 export default function App() {
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
         <PaperProvider theme={theme}>
           <AuthProvider>
@@ -32,6 +30,6 @@ export default function App() {
           </AuthProvider>
         </PaperProvider>
       </SafeAreaProvider>
-    </GestureHandlerRootView>
+
   );
 }
