@@ -14,7 +14,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Text, Avatar, Chip } from "react-native-paper";
 
 import { AuthContext } from "../contexts/AuthContext";
-import { AppContext } from "../contexts/AppProvider";   // ✅ FIXED
+import { AppContext } from "../contexts/AppProvider";   
 import api from "../services/api";
 import ListingCard from "../components/ListingCard";
 
@@ -28,7 +28,7 @@ const banners = [
 
 export default function HomeScreen({ navigation, route }) {
   const { user } = useContext(AuthContext);
-  const { state, dispatch } = useContext(AppContext);   // ✅ FIXED
+  const { state, dispatch } = useContext(AppContext);   
 
   const initials = user?.name
     ? user.name.split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase()
@@ -60,7 +60,6 @@ export default function HomeScreen({ navigation, route }) {
     }
   };
 
-  /* AUTO-SCROLL BANNER */
   useEffect(() => {
     const t = setInterval(() => {
       bannerIndex.current = (bannerIndex.current + 1) % banners.length;
@@ -73,14 +72,12 @@ export default function HomeScreen({ navigation, route }) {
     return () => clearInterval(t);
   }, []);
 
-  /* SEARCH FILTER */
   const filtered = listings.filter((l) =>
     l.title?.toLowerCase().includes(searchText.toLowerCase())
   );
 
   return (
     <SafeAreaView style={styles.safe}>
-      {/* HEADER */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.openDrawer()}>
           <Text style={styles.menuText}>≡</Text>
