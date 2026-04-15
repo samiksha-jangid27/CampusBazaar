@@ -1,10 +1,10 @@
 # CampusBazaar
 
-CampusBazaar is a full-stack marketplace app for college campuses. Students can sign up with OTP verification, list products or services, browse listings, and manage accounts from a mobile app.
+CampusBazaar is a full-stack marketplace app for college campuses. Students can sign up with OTP verification, list products or services, browse listings, and manage accounts from a frontend app.
 
 ## Tech Stack
 
-- Mobile: React Native + Expo + React Navigation + React Query
+- Frontend: React Native + Expo + React Navigation + React Query
 - Backend: Node.js + Express
 - Database: PostgreSQL + Prisma ORM
 - Auth: JWT with OTP-based email verification and password reset
@@ -17,7 +17,7 @@ CampusBazaar/
 ├── backend/                # Express + Prisma API
 │   ├── prisma/
 │   └── src/
-├── mobile/                 # Expo React Native app
+├── frontend/               # Expo React Native app
 └── README.md
 ```
 
@@ -71,8 +71,8 @@ From the project root:
 cd backend
 npm install
 
-# Mobile deps
-cd ../mobile
+# Frontend deps
+cd ../frontend
 npm install
 ```
 
@@ -103,9 +103,9 @@ npm run dev
 
 Backend runs on `http://localhost:3000` by default.
 
-### 2) Start Mobile App
+### 2) Start Frontend App
 
-From `mobile/`:
+From `frontend/`:
 
 ```bash
 npm start
@@ -116,14 +116,14 @@ Then choose:
 - `a` for Android emulator
 - `w` for web
 
-## API Base URL Behavior (Mobile)
+## API Base URL Behavior (Frontend)
 
-The mobile app currently uses:
+The frontend app currently uses:
 
 - iOS: `http://127.0.0.1:3000/api`
 - Android emulator: `http://10.0.2.2:3000/api`
 
-If you test on a physical phone, update the base URL in `mobile/src/services/api.js` to your machine's LAN IP.
+If you test on a physical phone, update the base URL in `frontend/src/services/api.js` to your machine's LAN IP.
 
 ## API Overview
 
@@ -152,7 +152,7 @@ npm start
 npm run prisma:generate
 ```
 
-Mobile (`mobile/package.json`):
+Frontend (`frontend/package.json`):
 
 ```bash
 npm start

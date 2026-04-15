@@ -38,17 +38,17 @@ backend/src/generated/prisma/
 backend/prisma/dev.db
 
 # ------------------------------
-# Mobile (Expo / React Native)
+# Frontend (Expo / React Native)
 # ------------------------------
-mobile/.expo/
-mobile/.expo-shared/
-mobile/dist/
-mobile/web-build/
-mobile/expo-env.d.ts
-mobile/.metro-health-check*
-mobile/.kotlin/
-mobile/android/
-mobile/ios/
+frontend/.expo/
+frontend/.expo-shared/
+frontend/dist/
+frontend/web-build/
+frontend/expo-env.d.ts
+frontend/.metro-health-check*
+frontend/.kotlin/
+frontend/android/
+frontend/ios/
 
 # Native signing artifacts
 *.orig.*
